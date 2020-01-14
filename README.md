@@ -1,2 +1,2 @@
-# dash-2
-2.0 Dash Demo
+# dash-3
+3.0 Hanzo Admin Dash
