@@ -82,7 +82,8 @@
     "poststylus": "1.0.0",
     "rucksack-css": "1.0.2",
     "rupture": "0.7.1",
-    "styled-jsx-plugin-stylus": "0.0.4"
+    "styled-jsx-plugin-stylus": "0.0.4",
+    "stylus": "0.54.7"
   },
   "browserslist": [
     "last 1 version",
