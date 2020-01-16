@@ -1,6 +1,24 @@
+import {
+  cyan,
+  indigo,
+  red,
+} from '@material-ui/core/colors'
+
+import CssBaseline from '@material-ui/core/CssBaseline'
+import NoSsr from '@material-ui/core/NoSsr'
+
+import {
+  MuiThemeProvider,
+  createMuiTheme,
+  withStyles,
+} from '@material-ui/core/styles'
+
+import {
+  Provider,
+} from 'mobx-react'
+
+import App from 'next/app'
 import React from 'react'
-import App, { Container } from 'next/app'
-import Router from 'next/router'
 
 import {
   Drawer,
@@ -8,40 +26,24 @@ import {
   Header,
 } from '../components/layout'
 
-import NoSsr from '@material-ui/core/NoSsr'
-import CssBaseline from "@material-ui/core/CssBaseline"
-
 import {
-  Provider,
-  observer
-} from 'mobx-react'
-
-import initStore from '../stores'
-
-import {
-  blue,
-  yellow,
-} from '@material-ui/core/colors'
-
-import {
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles'
+  StoreProvider,
+  initStore,
+} from '../stores'
 
 import 'reeeset/src/reeeset.css'
 import 'flag-icon-css/css/flag-icon.css'
 import 'filepond/dist/filepond.min.css'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'
-import '../styles.styl'
 
 const theme = createMuiTheme({
   palette: {
     type: 'light',
     primary: {
-      main: blue[500],
+      main: indigo[900],
     },
     secondary: {
-      main: yellow[800],
+      main: cyan[500],
       contrastText: '#FFF',
     },
     background: {
@@ -50,7 +52,21 @@ const theme = createMuiTheme({
   },
 })
 
-@observer
+const styles = {
+  component: {
+    '& .error': {
+      color: red[500],
+    },
+    '& .control': {
+      width: '100%',
+
+      '& > *': {
+        width: '100%',
+      },
+    },
+  },
+}
+
 class MyApp extends App {
   static async getInitialProps(appContext) {
     //
@@ -63,52 +79,49 @@ class MyApp extends App {
     const appProps = await App.getInitialProps(appContext)
     pageProps = appProps.pageProps
 
-    const isServer = typeof window === 'undefined'
-    const data = initStore()
-
-    console.log('data', data)
-
     return {
       pageProps,
-      data,
     }
   }
 
-  constructor(props) {
-    super(props)
+  render() {
+    const { Component, classes } = this.props
 
-    // this needs to be calculated in situ because it can be run on both server
-    // and client
     const isServer = typeof window === 'undefined'
+    let isIndex = true
 
-    this.store = isServer
-      ? props.data
-      : initStore(props.data)
+    if (!isServer) {
+      isIndex = window.location.pathname === '/'
+    }
 
-    console.log('store', props.isServer, this.store)
+    const store = initStore()
+
+    return (
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <NoSsr>
+          <Provider store={store}>
+            <StoreProvider>
+              <div className={classes.component}>
+                { !isIndex
+                  && <>
+                    <Header singleSubmit={false} />
+                    <Drawer variant='permanent' />
+                  </>
+                }
+                <Component/>
+                { !isIndex
+                  && <Footer/>
+                }
+              </div>
+            </StoreProvider>
+          </Provider>
+        </NoSsr>
+      </MuiThemeProvider>
+    )
   }
 
-  // componentDidMount() {
-  //   stopLoading()
-  // }
-
-  render () {
-    const { Component, pageProps } = this.props
-
-
-    return pug`
-      MuiThemeProvider(theme=theme)
-        CssBaseline
-        NoSsr
-          Provider(store=this.store)
-            Header(singleSubmit=false)
-            Drawer(variant='permanent')
-            Component
-            Footer
-    `
-  }
-
-  componentDidCatch (error, errorInfo) {
+  componentDidCatch(error, errorInfo) {
     console.log('CUSTOM ERROR HANDLING', error)
     // This is needed to render errors correctly in development / production
     super.componentDidCatch(error, errorInfo)
@@ -127,4 +140,4 @@ class MyApp extends App {
 //   stopLoading()
 // })
 
-export default MyApp
+export default withStyles(styles)(MyApp)

@@ -1,40 +1,53 @@
-import { Component } from 'react'
-import { inject, observer } from 'mobx-react'
-import midstream from 'midstream'
-import Router from 'next/router'
-import moment from 'moment-timezone'
-
-import { MUITable } from '../../tables'
-import capitalize from '../../../src/string/capitalize'
-
-import { renderDate } from '@hanzo/utils'
-import { cleanPhone } from '@hanzo/middleware'
-
 import {
   MUIText,
-  MUIPhone,
-  MUIKeyboardDatePicker,
 } from '@hanzo/react'
-
-import {
-  KYC_STATUS_OPTIONS,
-  BOOL_STRING_OPTIONS,
-} from '../../../src/consts'
+import { renderDate } from '@hanzo/utils'
 
 import {
   Button,
-  Grid,
   ExpansionPanel,
-  ExpansionPanelSummary,
   ExpansionPanelDetails,
-  Typography,
-  Paper,
+  ExpansionPanelSummary,
+  Grid,
   InputAdornment,
+  Typography,
 } from '@material-ui/core'
+
+import { makeStyles } from '@material-ui/core/styles'
 
 import {
   Search as SearchIcon,
 } from '@material-ui/icons'
+
+import { useObserver } from 'mobx-react'
+import moment from 'moment-timezone'
+import Router from 'next/router'
+
+import React, { useRef, useState } from 'react'
+
+import { useMidstream } from '../../../src/hooks'
+import { useStore } from '../../../stores'
+
+import { MUITable } from '../../tables'
+
+const useStyles = makeStyles((theme) => ({
+  searchForm: {
+    position: 'sticky',
+    top: 64,
+    zIndex: 1000,
+    background: theme.palette.background.paper,
+    paddingTop: 16,
+    marginTop: -16,
+  },
+  searchLine: {
+    margin: 0,
+    padding: '0 16px',
+    width: '100%',
+  },
+  expand: {
+    borderRadius: '0 !important',
+  },
+}))
 
 const columns = [
   {
@@ -50,437 +63,349 @@ const columns = [
     field: 'lastName',
   },
   {
+    title: 'City',
+    field: 'shippingAddressCity',
+    render: (row) => row.shippingAddress.city,
+  },
+  {
+    title: 'Postal Code',
+    field: 'shippingAddressPostalCode',
+    render: (row) => row.shippingAddress.postalCode,
+  },
+  {
     title: 'State',
-    field: 'state',
-    render: (row) => row.kyc.address.state
+    field: 'shippingAddressState',
+    render: (row) => row.shippingAddress.state,
   },
   {
     title: 'Country',
-    field: 'country',
-    render: (row) => row.kyc.address.country
-  },
-  {
-    title: 'Flagged',
-    field: 'flagged',
-    render: (row) => row.kyc.flagged ? 'True' : 'False'
-  },
-  {
-    title: 'Frozen',
-    field: 'frozen',
-    render: (row) => row.kyc.frozen ? 'True' : 'False'
-  },
-  {
-    title: 'Status',
-    field: 'status',
-    render: (row) => capitalize(row.kyc.status)
+    field: 'shippingAddressCountry',
+    render: (row) => row.shippingAddress.country,
   },
   {
     title: 'Created',
-    field: 'createdAt',
-    render: (row) => renderDate(row.createdAt)
+    field: 'shippingAddressCreated',
+    render: (row) => renderDate(row.createdAt),
   },
   {
     title: 'Updated',
-    field: 'updatedAt',
-    render: (row) => moment(row.createdAt).fromNow()
+    field: 'shippingAddressUpdated',
+    render: (row) => moment(row.updatedAt).fromNow(),
   },
 ]
 
-@inject("store")
-@observer
-class UsersTable extends Component {
-  constructor(props) {
-    super(props)
+const UsersTable = () => {
+  const tableRef = useRef(null)
+  const classes = useStyles()
+  const {
+    settingsStore,
+    usersStore,
+  } = useStore()
 
-    this.tableRef = React.createRef()
+  const [error, setError] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-    const usersStore = props.store.usersStore
-    const settingsStore = props.store.settingsStore
+  const ms = useMidstream({
+    q: '',
 
-    this.ms = midstream({
-      KYCPhone: [cleanPhone],
-    },
-    {
-      defaults: {
-        q: '',
+    // Personal
+    FirstNamePartials: '',
+    LastNamePartials: '',
+    CreatedAt: '',
 
-        // Personal
-        FirstNamePartials: '',
-        LastNamePartials: '',
-        KYCGender: '',
-        KYCTaxId: '',
-        KYCBirthdate: '',
-        CreatedAt: '',
+    // Contact
+    EmailPartials: '',
 
-        // Contact
-        EmailPartials: '',
-        KYCPhone: '',
+    // Address
+    ShippingAddressLine1: '',
+    ShippingAddressLine2: '',
+    ShippingAddressCity: '',
+    ShippingAddressPostalCode: '',
+    ShippingAddressStateCode: '',
+    ShippingAddressCountryCode: '',
+  }, {
+    dst: usersStore.searchTokens,
+  })
 
-        // Address
-        KYCAddressLine1: '',
-        KYCAddressLine2: '',
-        KYCAddressCity: '',
-        KYCAddressPostalCode: '',
-        KYCAddressStateCode: '',
-        KYCAddressCountryCode: '',
+  const {
+    setShippingAddressLine1,
+    setShippingAddressLine2,
+    setShippingAddressCity,
+    setShippingAddressPostalCode,
+    setShippingAddressStateCode,
+    setShippingAddressCountryCode,
+    run,
+  } = ms
 
-        // Status
-        KYCFlagged: '',
-        KYCFrozen: '',
-        KYCStatus: '',
-      },
-      dst: usersStore.searchTokens,
-    })
-
-    this.state = {
-      error: false,
-      isLoading: false,
-    }
-  }
-
-  async search() {
-    this.setState({
-      error: false,
-      isLoading: true,
-    })
+  const search = async () => {
+    setError(false)
+    setIsLoading(true)
 
     try {
-      await this.ms.source.runAll()
+      await run()
 
-      this.props.store.usersStore.page = 1
-      this.tableRef.current && this.tableRef.current.onQueryChange()
-
+      usersStore.page = 1
+      if (tableRef.current) {
+        tableRef.current.onQueryChange()
+      }
     } catch (e) {
-      this.setState({
-        error: e.message || e,
-      })
+      setError(e.message || e)
     }
 
-    this.setState({
-        isLoading: false,
-    })
+    setIsLoading(false)
   }
 
-  async onRowClick(event, rowData) {
-    this.setState({
-      error: false,
-      isLoading: true,
-    })
+  const onRowClick = (event, rowData) => {
+    setError(false)
+    setIsLoading(true)
 
     try {
-      const usersStore = this.props.store.usersStore
-
       usersStore.userId = rowData.id
       usersStore.user = rowData
 
-      Router.push('/dash/user?id='+rowData.id)
+      Router.push(`/dash/user?id=${rowData.id}`)
     } catch (e) {
-      this.setState({
-        error: e.message || e,
-      })
+      setError(e.message || e)
     }
 
-    this.setState({
-        isLoading: false,
-    })
+    setIsLoading(false)
   }
 
-  create() {
+  const create = () => {
     Router.push('/dash/user')
   }
 
-  render() {
-    const usersStore = this.props.store.usersStore
-    const settingsStore = this.props.store.settingsStore
+  const { hooks, dst } = ms
+  const disabled = isLoading || usersStore.isLoading
 
-    const { hooks, dst, errors } = this.ms
-    const { error, isLoading } = this.state
-    const disabled = isLoading || usersStore.isLoading
+  const data = (query) => (
+    usersStore.listUsers(query.page + 1, query.pageSize, query)
+      .then((res) => ({
+        data: res.models,
+        page: res.page - 1,
+        totalCount: res.count,
+      })))
 
-    let data = (query) => {
-      return usersStore.listUsers(query.page + 1, query.pageSize, query)
-        .then((res) => {
-          return {
-            data: res.models,
-            page: res.page-1,
-            totalCount: res.count,
-          }
-        })
-    }
-
-    let opts = {
-      search:          false,
-      pageSize:        usersStore.display,
-      pageSizeOptions: [10, 20, 100],
-    }
-
-    let SearchInputProps =  {
-      startAdornment: pug`
-        InputAdornment(position='start')
-          SearchIcon
-        `,
-    }
-
-    return <> {
-      pug`
-        .users-search
-          .users-search-form.form
-            .error
-              =error
-            Grid(container spacing=2 alignItems='center')
-              Grid(item xs=12).error
-                =error
-              Grid(item).grow
-                MUIText(
-                  placeholder='Search'
-                  type='search'
-                  disabled=disabled
-                  shrink=true
-                  value=dst.q
-                  setValue=hooks.q[1]
-                  InputProps=SearchInputProps
-                )
-              Grid(item)
-                Button(
-                  variant='contained'
-                  color='primary'
-                  type='submit'
-                  disabled=disabled
-                  onClick=() => this.search()
-                )
-                  | Search
-              Grid(item)
-                Button(
-                  variant='contained'
-                  color='secondary'
-                  type='submit'
-                  disabled=disabled
-                  onClick=() => this.create()
-                )
-                  | Create
-            br
-            ExpansionPanel
-              ExpansionPanelSummary
-                Typography(variant='body1')
-                  | + Advanced Options
-              ExpansionPanelDetails
-                Grid(container spacing=2 alignItems='center')
-                  Grid(item xs=12)
-                    Typography(variant='body2')
-                      | Personal Information
-                  Grid(item xs=2)
-                    MUIText(
-                      label='First Name'
-                      type='search'
-                      placeholder='Jean'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.FirstNamePartials
-                      setValue=hooks.FirstNamePartials[1]
-                    )
-                  Grid(item xs=2)
-                    MUIText(
-                      label='Last Name'
-                      type='search'
-                      placeholder='Doe'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.LastNamePartials
-                      setValue=hooks.LastNamePartials[1]
-                    )
-                  Grid(item xs=2)
-                    MUIText(
-                      label='Gender'
-                      select
-                      options=settingsStore.genderOptions
-                      allowEmpty
-                      placeholder='Select a Gender'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCGender
-                      setValue=hooks.KYCGender[1]
-                    )
-                  Grid(item xs=2)
-                    MUIText(
-                      label='Tax Id(SSN)'
-                      type='search'
-                      placeholder='555-55-5555'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCTaxId
-                      setValue=hooks.KYCTaxId[1]
-                    )
-                  // Ignore until we get proper unix dates in the system
-                  // Grid(item xs=2)
-                  //   MUIKeyboardDatePicker(
-                  //     label='Day of Birth'
-                  //     disabled=disabled
-                  //     shrink=true
-                  //     value=dst.KYCBirthdate
-                  //     setValue=hooks.KYCBirthdate[1]
-                  //   )
-                  // Grid(item xs=2)
-                  //   MUIKeyboardDatePicker(
-                  //     label='Created on'
-                  //     disabled=disabled
-                  //     shrink=true
-                  //     value=dst.CreatedAt
-                  //     setValue=hooks.CreatedAt[1]
-                  //   )
-                br
-                Grid(container spacing=2 alignItems='center')
-                  Grid(item xs=12)
-                    Typography(variant='body2')
-                      | Contact Information
-                  Grid(item xs=3)
-                    MUIText(
-                      label='Email'
-                      type='search'
-                      placeholder='person@email.com'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.EmailPartials
-                      setValue=hooks.EmailPartials[1]
-                    )
-                  Grid(item xs=3)
-                    MUIPhone(
-                      label='Phone'
-                      type='search'
-                      disabled=disabled
-                      value=dst.KYCPhone
-                      setValue=hooks.KYCPhone[1]
-                    )
-                br
-                Grid(container spacing=2 alignItems='center')
-                  Grid(item xs=12)
-                    Typography(variant='body2')
-                      | Address
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Address'
-                      type='search'
-                      placeholder='123  Aviation Way'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCAddressLine1
-                      setValue=hooks.KYCAddressLine1[1]
-                    )
-                  Grid(item xs=2)
-                    MUIText(
-                      label='Suite'
-                      type='search'
-                      placeholder='Apt #1'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCAddressLine2
-                      setValue=hooks.KYCAddressLine2[1]
-                    )
-                  Grid(item xs=4)
-                    MUIText(
-                      label='City'
-                      type='search'
-                      placeholder='Los Angeles'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCAddressCity
-                      setValue=hooks.KYCAddressCity[1]
-                    )
-                  Grid(item xs=4)
-                    MUIText(
-                      label='ZIP/Postal Code'
-                      type='search'
-                      placeholder='90017'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCAddressPostalCode
-                      setValue=hooks.KYCAddressPostalCode[1]
-                    )
-                  Grid(item xs=4)
-                    MUIText(
-                      label='Region/State'
-                      select
-                      options=settingsStore.stateOptions[dst.KYCAddressCountryCode]
-                      allowEmpty
-                      placeholder='Select a State'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCAddressStateCode
-                      setValue=hooks.KYCAddressStateCode[1]
-                    )
-                  Grid(item xs=4)
-                    MUIText(
-                      label='Country'
-                      select
-                      options=settingsStore.countryOptions
-                      allowEmpty
-                      placeholder='Select a Country'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCAddressCountryCode
-                      setValue=hooks.KYCAddressCountryCode[1]
-                    )
-                br
-                Grid(container spacing=2 alignItems='center')
-                  Grid(item xs=12)
-                    Typography(variant='body2')
-                      | Status
-                  Grid(item xs=2)
-                    MUIText(
-                      label='Flagged'
-                      select
-                      options=BOOL_STRING_OPTIONS
-                      allowEmpty
-                      placeholder='Select an Option'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCFlagged
-                      setValue=hooks.KYCFlagged[1]
-                    )
-                  Grid(item xs=2)
-                    MUIText(
-                      label='Frozen'
-                      select
-                      options=BOOL_STRING_OPTIONS
-                      allowEmpty
-                      placeholder='Select an Option'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCFrozen
-                      setValue=hooks.KYCFrozen[1]
-                    )
-                  Grid(item xs=2)
-                    MUIText(
-                      label='Status'
-                      type='search'
-                      select
-                      options=KYC_STATUS_OPTIONS
-                      allowEmpty
-                      placeholder='Select a Status'
-                      disabled=disabled
-                      shrink=true
-                      value=dst.KYCStatus
-                      setValue=hooks.KYCStatus[1]
-                    )
-          br
-          .users-table.table
-            MUITable(
-              tableRef=this.tableRef
-              columns=columns
-              options=opts
-              isLoading=usersStore.isLoading
-              initialPage=usersStore.triggerNewSearch ? 0 : undefined
-              data=data
-              title='Users'
-              onRowClick=this.onRowClick.bind(this)
-            )
-      `}
-      <style jsx global>{`
-        .users-search
-          .grow
-            flex-grow: 1
-      `}</style>
-    </>
+  const opts = {
+    search: false,
+    pageSize: usersStore.display,
+    pageSizeOptions: [10, 20, 100],
   }
+
+  const SearchInputProps = {
+    startAdornment: (
+      <InputAdornment position='start'>
+        <SearchIcon />
+      </InputAdornment>
+    ),
+  }
+
+  console.log('isLoading', isLoading, usersStore.isLoading, disabled)
+
+  return useObserver(() => (
+    <div>
+      <div className={classes.searchForm}>
+        { error
+          && <div className='error'>
+            { error }
+          </div>
+        }
+        <Grid className={classes.searchLine} container spacing={2} alignItems='center'>
+          <Grid xs item>
+            <MUIText
+              placeholder='Search'
+              type='search'
+              disabled={disabled}
+              shrink
+              value={dst.q}
+              setValue={hooks.q[1]}
+              InputProps={SearchInputProps}
+            />
+          </Grid>
+          <Grid item>
+            <Button
+              variant='contained'
+              color='primary'
+              type='submit'
+              disabled={disabled}
+              onClick={search}
+            >
+              Search
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              variant='contained'
+              color='secondary'
+              type='submit'
+              disabled={disabled}
+              onClick={create}
+            >
+              Create
+            </Button>
+          </Grid>
+        </Grid>
+        <ExpansionPanel className={classes.expand}>
+          <ExpansionPanelSummary>
+            <Typography variant='body1'>
+              + Advanced Options
+            </Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <Grid container spacing={2} alignItems='center'>
+              <Grid item xs={12}>
+                <Typography variant='body2'>
+                  Personal Information
+                </Typography>
+              </Grid>
+              <Grid item xs={3}>
+                <MUIText
+                  label='First Name'
+                  type='search'
+                  placeholder='Jean'
+                  disabled={disabled}
+                  shrink
+                  value={dst.FirstNamePartials}
+                  setValue={hooks.FirstNamePartials[1]}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <MUIText
+                  label='Last Name'
+                  type='search'
+                  placeholder='Doe'
+                  disabled={disabled}
+                  shrink
+                  value={dst.LastNamePartials}
+                  setValue={hooks.LastNamePartials[1]}
+                />
+              </Grid>
+              {
+              // Grid(item xs=2)
+              //   MUIKeyboardDatePicker(
+              //     label='Created on'
+              //     disabled=disabled
+              //     shrink=true
+              //     value=dst.CreatedAt
+              //     setValue=hooks.CreatedAt[1]
+              //   )
+              }
+            </Grid>
+            <br />
+            <Grid container spacing={2} alignItems='center'>
+              <Grid item xs={12} >
+                <Typography variant='body2'>
+                  Contact Information
+                </Typography>
+              </Grid>
+              <Grid item xs={3}>
+                <MUIText
+                  label='Email'
+                  type='search'
+                  placeholder='person@email.com'
+                  disabled={disabled}
+                  shrink
+                  value={dst.EmailPartials}
+                  setValue={hooks.EmailPartials[1]}
+                />
+              </Grid>
+            </Grid>
+            <br />
+            <Grid container spacing={2} alignItems='center'>
+              <Grid item xs={12}>
+                <Typography variant='body2'>
+                  Address
+                </Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <MUIText
+                  label='Country'
+                  select
+                  options={settingsStore.countryOptions}
+                  allowEmpty
+                  placeholder='Select a Country'
+                  disabled={disabled}
+                  shrink
+                  value={dst.ShippingAddressCountryCode}
+                  setValue={setShippingAddressCountryCode}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <MUIText
+                  label='Region/State'
+                  select
+                  options={settingsStore.stateOptions[dst.ShippingAddressCountryCode]}
+                  allowEmpty
+                  placeholder='Select a State'
+                  disabled={disabled}
+                  shrink
+                  value={dst.ShippingAddressStateCode}
+                  setValue={setShippingAddressStateCode}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <MUIText
+                  label='ZIP/Postal Code'
+                  type='search'
+                  placeholder='90017'
+                  disabled={disabled}
+                  shrink
+                  value={dst.ShippingAddressPostalCode}
+                  setValue={setShippingAddressPostalCode}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <MUIText
+                  label='Address'
+                  type='search'
+                  placeholder='123  Aviation Way'
+                  disabled={disabled}
+                  shrink
+                  value={dst.ShippingAddressLine1}
+                  setValue={setShippingAddressLine1}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <MUIText
+                  label='Suite'
+                  type='search'
+                  placeholder='Apt #1'
+                  disabled={disabled}
+                  shrink
+                  value={dst.ShippingAddressLine2}
+                  setValue={setShippingAddressLine2}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <MUIText
+                  label='City'
+                  type='search'
+                  placeholder='Los Angeles'
+                  disabled={disabled}
+                  shrink
+                  value={dst.ShippingAddressCity}
+                  setValue={setShippingAddressCity}
+                />
+              </Grid>
+            </Grid>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+      </div>
+      <br />
+      <div className='.users-table.table'>
+        <MUITable
+          tableRef={tableRef}
+          columns={columns}
+          options={opts}
+          isLoading={usersStore.isLoading}
+          initialPage={usersStore.triggerNewSearch ? 0 : undefined}
+          data={data}
+          title='Users'
+          onRowClick={onRowClick}
+        />
+      </div>
+    </div>
+  ))
 }
 
 export default UsersTable

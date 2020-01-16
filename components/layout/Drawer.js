@@ -21,6 +21,7 @@ import {
   Movie as MovieIcon,
   Apps as AppsIcon,
   MonetizationOn as MonetizationOnIcon,
+  Receipt as ReceiptIcon,
 } from '@material-ui/icons'
 
 import Link from '../link'
@@ -54,34 +55,20 @@ class MyDrawer extends Component {
               ListItemText
                 Link(href='/dash' color='textPrimary' underline='none')
                   | Users
-            // ListItem
-            //   ListItemIcon(className=classes.listIcon)
-            //     Link.columns(href='/dash/products' color='textPrimary' underline='none')
-            //       ShoppingBasketIcon
-            //   ListItemText
-            //     Link(href='/dash/products' color='textPrimary' underline='none')
-            //       | Products
             ListItem
               ListItemIcon(className=classes.listIcon)
-                Link.columns(href='/dash/film' color='textPrimary' underline='none')
-                  MovieIcon
+                Link.columns(href='/dash/products' color='textPrimary' underline='none')
+                  ShoppingBasketIcon
               ListItemText
-                Link(href='/dash/film' color='textPrimary' underline='none')
-                  | Films
+                Link(href='/dash/products' color='textPrimary' underline='none')
+                  | Products
             ListItem
               ListItemIcon(className=classes.listIcon)
-                Link.columns(href='/dash/investment' color='textPrimary' underline='none')
-                  MonetizationOnIcon
+                Link.columns(href='/dash/orders' color='textPrimary' underline='none')
+                  ReceiptIcon
               ListItemText
-                Link(href='/dash/investment' color='textPrimary' underline='none')
-                  | Investment
-            ListItem
-              ListItemIcon(className=classes.listIcon)
-                Link.columns(href='/dash/moviedb' color='textPrimary' underline='none')
-                  StorageIcon
-              ListItemText
-                Link(href='/dash/moviedb' color='textPrimary' underline='none')
-                  | MovieDB
+                Link(href='/dash/products' color='textPrimary' underline='none')
+                  | Orders
             br
             ListItem
               ListItemIcon(className=classes.listIcon)

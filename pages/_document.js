@@ -1,14 +1,18 @@
 import React from 'react'
 import Document, { Html, Head, Main, NextScript } from 'next/document'
 
+// if (process) {
+//   console.log(process.env)
+// }
+
 export default class MyDocument extends Document {
 
-  getChildContext() {
-    return {
-      _documentProps: this.props,
-      _devOnlyInvalidateCacheQueryString: '',
-    }
-  }
+  // getChildContext() {
+  //   return {
+  //     _documentProps: this.props,
+  //     _devOnlyInvalidateCacheQueryString: '',
+  //   }
+  // }
 
   render() {
     const { pageContext } = this.props

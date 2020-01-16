@@ -22,7 +22,7 @@ import Link from '../link'
 import { fade } from '@material-ui/core/styles/colorManipulator'
 import { withStyles } from '@material-ui/core/styles'
 
-import logoImg from '../../assets/images/logo-white.png'
+import logoImg from '../../assets/images/logo.svg'
 
 import * as qs from 'query-string'
 

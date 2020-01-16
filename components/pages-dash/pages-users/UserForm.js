@@ -5,8 +5,6 @@ import Router from 'next/router'
 
 import {
   MUIText,
-  MUIKeyboardDatePicker,
-  MUIPhone,
   MUISwitch,
 } from '@hanzo/react'
 
@@ -23,10 +21,6 @@ import {
   assignPath,
   renderUIDate,
 } from '@hanzo/utils'
-
-import {
-  KYC_STATUS_OPTIONS
-} from '../../../src/consts'
 
 import classnames from 'classnames'
 
@@ -52,21 +46,17 @@ class UserForm extends Component {
       firstName: [isRequired],
       lastName:  [isRequired],
       email:     [isRequired, isEmail],
-      'kyc.gender':    [isRequired],
-      'kyc.birthdate': [isRequired],
-      'kyc.taxId':     [isRequired],
-      'kyc.phone':     [isRequired, isPhone],
-      'kyc.address.line1': [isRequired],
-      'kyc.address.line2': [],
-      'kyc.address.city':  [isRequired],
-      'kyc.address.postalCode': [isRequired],
-      'kyc.address.state':      [
+      'shippingAddress.line1': [isRequired],
+      'shippingAddress.line2': [],
+      'shippingAddress.city':  [isRequired],
+      'shippingAddress.postalCode': [isRequired],
+      'shippingAddress.state':      [
         isStateRequiredForCountry(
           () => settingsStore.stateOptions,
-          () => (usersStore.user.kyc && usersStore.user.kyc.address) ? usersStore.user.kyc.address.country : undefined,
+          () => (usersStore.user.kyc && usersStore.user.shippingAddress) ? usersStore.user.shippingAddress.country : undefined,
         )
       ],
-      'kyc.address.country':    [isRequired],
+      'shippingAddress.country':    [isRequired],
       'kyc.flagged': [],
       'kyc.frozen':  [],
       'kyc.status':  [isRequired],
@@ -124,17 +114,7 @@ class UserForm extends Component {
     return pug`
       div.user-form.form
         Grid(container justify='center' alignItems='flex-start' spacing=2)
-          Grid(item sm=6 xs=12)
-            Card
-              CardContent
-                Typography(variant='h6')
-                  | Photo
-                if user.kyc && user.kyc.documents
-                  Grid(container)
-                    each document, i in user.kyc.documents
-                      Grid(item key=i xs=4)
-                        img(src=document)
-            br
+          Grid(item xs=6)
             if !doCreate
               Card
                 CardContent
@@ -156,7 +136,7 @@ class UserForm extends Component {
                         | Updated At
                       Typography(variant='body2')
                         =renderUIDate(user.updatedAt)
-          Grid(item xs=6)
+            br
             Card
               CardContent
                 Grid(container justify='center' alignItems='flex-start' spacing=2).user-form.form
@@ -192,97 +172,70 @@ class UserForm extends Component {
                       error=errors.lastName
                       setValue=hooks.lastName[1]
                     )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Gender'
-                      select
-                      options=settingsStore.genderOptions
-                      variant='outlined'
-                      disabled=disabled
-                      placeholder='Select a Gender'
-                      value=getPath(user, 'kyc.gender')
-                      error=errors['kyc.gender']
-                      setValue=hooks['kyc.gender'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIKeyboardDatePicker(
-                      label='Date of Birth'
-                      inputVariant='outlined'
-                      disabled=disabled
-                      value=getPath(user, 'kyc.birthdate')
-                      error=errors['kyc.birthdate']
-                      setValue=hooks['kyc.birthdate'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Tax Id(SSN)'
-                      sensitive
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(user, 'kyc.taxId')
-                      error=errors['kyc.taxId']
-                      setValue=hooks['kyc.taxId'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIPhone(
-                      label='Phone'
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(user, 'kyc.phone')
-                      error=errors['kyc.phone']
-                      inputValue=hooks['kyc.phone'][1]
-                    )
                   Grid(item xs=12)
-                    br
+                    Button(
+                      size='large'
+                      variant='contained'
+                      color='primary'
+                      type='submit'
+                      disabled=disabled
+                      onClick=() => this.submit()
+                    )
+                      =doCreate ? 'Create' : 'Save'
+          Grid(item xs=6)
+            Card
+              CardContent
+                Grid(container justify='center' alignItems='flex-start' spacing=2).user-form.form
+                  Grid(item xs=12)
                     Typography(variant='h6')
-                      | Contact Information
+                      | Default Shipping Information
                   Grid(item xs=9)
                     MUIText(
                       label='Address'
                       variant='outlined'
                       disabled=disabled
-                      value=getPath(user, 'kyc.address.line1')
-                      error=errors['kyc.address.line1']
-                      setValue=hooks['kyc.address.line1'][1]
+                      value=getPath(user, 'shippingAddress.line1')
+                      error=errors['shippingAddress.line1']
+                      setValue=hooks['shippingAddress.line1'][1]
                     )
                   Grid(item xs=3)
                     MUIText(
                       label='Suite'
                       variant='outlined'
                       disabled=disabled
-                      value=getPath(user, 'kyc.address.line2')
-                      error=errors['kyc.address.line1']
-                      setValue=hooks['kyc.address.line1'][1]
+                      value=getPath(user, 'shippingAddress.line2')
+                      error=errors['shippingAddress.line1']
+                      setValue=hooks['shippingAddress.line1'][1]
                     )
                   Grid(item xs=8)
                     MUIText(
                       label='City'
                       variant='outlined'
                       disabled=disabled
-                      value=getPath(user, 'kyc.address.city')
-                      error=errors['kyc.address.city']
-                      setValue=hooks['kyc.address.city'][1]
+                      value=getPath(user, 'shippingAddress.city')
+                      error=errors['shippingAddress.city']
+                      setValue=hooks['shippingAddress.city'][1]
                     )
                   Grid(item xs=4)
                     MUIText(
                       label='ZIP/Postal Code'
                       variant='outlined'
                       disabled=disabled
-                      value=getPath(user, 'kyc.address.postalCode')
-                      error=errors['kyc.address.postalCode']
-                      setValue=hooks['kyc.address.postalCode'][1]
+                      value=getPath(user, 'shippingAddress.postalCode')
+                      error=errors['shippingAddress.postalCode']
+                      setValue=hooks['shippingAddress.postalCode'][1]
                     )
                   Grid(item xs=6)
                     MUIText(
                       label='Region/State'
                       select
-                      options=settingsStore.stateOptions[getPath(user, 'kyc.address.country')]
+                      options=settingsStore.stateOptions[getPath(user, 'shippingAddress.country')]
                       variant='outlined'
                       disabled=disabled
                       placeholder='Select a State'
-                      value=getPath(user, 'kyc.address.state')
-                      error=errors['kyc.address.state']
-                      setValue=hooks['kyc.address.state'][1]
+                      value=getPath(user, 'shippingAddress.state')
+                      error=errors['shippingAddress.state']
+                      setValue=hooks['shippingAddress.state'][1]
                     )
                   Grid(item xs=6)
                     MUIText(
@@ -292,41 +245,9 @@ class UserForm extends Component {
                       variant='outlined'
                       disabled=disabled
                       placeholder='Select a Country'
-                      value=getPath(user, 'kyc.address.country')
-                      error=errors['kyc.address.country']
-                      setValue=hooks['kyc.address.country'][1]
-                    )
-                  Grid(item xs=12)
-                    br
-                    Typography(variant='h6')
-                      | Know Your Customer
-                  Grid(item xs=4)
-                    MUISwitch(
-                      label='Flagged'
-                      disabled=disabled
-                      defaultValue=getPath(user, 'kyc.flagged')
-                      error=errors['kyc.flagged']
-                      setValue=hooks['kyc.flagged'][1]
-                    )
-                  Grid(item xs=4)
-                    MUISwitch(
-                      label='Frozen'
-                      disabled=disabled
-                      defaultValue=getPath(user, 'kyc.frozen')
-                      error=errors['kyc.frozen']
-                      setValue=hooks['kyc.frozen'][1]
-                    )
-                  Grid(item xs=4)
-                    MUIText(
-                      label='Status'
-                      select
-                      options=KYC_STATUS_OPTIONS
-                      variant='outlined'
-                      disabled=disabled
-                      placeholder='Select a Status'
-                      value=getPath(user, 'kyc.status')
-                      error=errors['kyc.status']
-                      setValue=hooks['kyc.status'][1]
+                      value=getPath(user, 'shippingAddress.country')
+                      error=errors['shippingAddress.country']
+                      setValue=hooks['shippingAddress.country'][1]
                     )
                   Grid(item xs=12)
                     Button(
@@ -338,6 +259,7 @@ class UserForm extends Component {
                       onClick=() => this.submit()
                     )
                       =doCreate ? 'Create' : 'Save'
+          Grid(item xs=6)
     `
   }
 }

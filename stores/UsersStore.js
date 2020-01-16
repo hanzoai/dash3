@@ -95,6 +95,7 @@ export default class UsersStore {
   }
 
   @action async listUsers(page, display, query) {
+    console.log(query)
     this.isLoading = true
 
     this.query   = query || this.query
@@ -108,9 +109,6 @@ export default class UsersStore {
     if (query.orderBy) {
       this.sort = (query.orderDirection === 'asc' ? '-' : '') + capitalize(query.orderBy.field)
     }
-
-    this.countries   = akasha.get('library.countries') || []
-    this.lastChecked = renderDate(new Date(), rfc3339)
 
     try {
       const opts = {
@@ -152,17 +150,16 @@ export default class UsersStore {
       runInAction(() => {
         this.users = res.models
         this.count = parseInt(res.count, 10)
-        this.isLoading = false
       })
     } catch(e) {
-      runInAction(() => {
-        this.isLoading = false
-      })
-
       throw e
     }
 
-    console.log('display', this.display)
+    runInAction(() => {
+      this.isLoading = false
+    })
+
+    console.log('display', this.display, this.isLoading)
 
     return {
       models:  this.users,

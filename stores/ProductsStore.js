@@ -103,9 +103,6 @@ export default class ProductsStore {
       this.sort = (query.orderDirection === 'asc' ? '-' : '') + capitalize(query.orderBy.field)
     }
 
-    this.countries   = akasha.get('library.countries') || []
-    this.lastChecked = renderDate(new Date(), rfc3339)
-
     try {
       const opts = {
         page: this.page,

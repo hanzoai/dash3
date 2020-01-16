@@ -14,8 +14,7 @@ import {
 
 import css from 'styled-jsx/css'
 
-import bgImg from '../assets/images/main-bg.jpg'
-import logoImg from '../assets/images/logo.png'
+import logoImg from '../assets/images/logo-dark.svg'
 
 @isLoggedOut
 @inject("store")
@@ -46,7 +45,7 @@ class Index extends Component {
       `}
       <style jsx global>{`
         #index
-          background-image: url(${ bgImg })
+          background-color: #1a237e
           background-position: center
           background-size: cover
 

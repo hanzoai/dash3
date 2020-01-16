@@ -1,69 +1,61 @@
-import { Component } from 'react'
+import { makeStyles } from '@material-ui/core/styles'
+import React from 'react'
 
-import { inject, observer } from 'mobx-react'
 import { isLoggedIn } from '../../components/pages'
 import UsersSearch from '../../components/pages-dash/pages-users/UsersSearch'
 
-import {
-  Grid,
-  Typography,
-  LinearProgress,
-} from '@material-ui/core'
+const useStyles = makeStyles((theme) => ({
+  main: {
+    paddingLeft: 200,
+    paddingTop: 80,
+    width: '100vw',
 
-import css from 'styled-jsx/css'
-import capitalize from '../../src/string/capitalize'
+    '& .users-serach-form': {
+      padding: [0, theme.spacing(1)],
+      width: '100%',
+      margin: 0,
+    },
 
-@isLoggedIn
-@inject("store")
-@observer
-class Index extends Component {
-  constructor(props) {
-    super(props)
-  }
+    '& .MuiExpansionPanelDetails-root': {
+      flexDirection: 'column',
+    },
 
-  render() {
-    return <> {
-      pug`
-        main#dash.users
-          UsersSearch
-      `}
-      <style jsx global>{`
-        #dash.users
-          padding-left: 200px
-          padding-top: 80px
-          width: 100vw
+    '& .table': {
+      width: '100%',
 
-          .users-search-form
-            padding: 0 8px
-            width: 100%
-            margin: 0
+      '& .MuiTablePagination-root': {
+        border: 0,
+      },
 
+      '& .MuiPaper-root': {
+        boxShadow: 'none',
+        borderRadius: 0,
 
-          .MuiExpansionPanelDetails-root
-            flex-direction: column
+        '& > div': {
+          overflow: 'initial !important',
+        },
 
-          .table
-            width: 100%
+        '& > div > div': {
+          overflow: 'initial !important',
+        },
+      },
 
-            .MuiTablePagination-root
-              border: 0
+      '& th': {
+        top: theme.spacing(8),
+        position: 'sticky',
+      },
+    },
+  },
+}))
 
-            .MuiPaper-root
-              box-shadow: none
-              border-radius: 0
+const Users = isLoggedIn(() => {
+  const classes = useStyles()
 
-              & > div
-                overflow: initial !important
+  return <>
+    <main className={classes.main} >
+      <UsersSearch />
+    </main>
+  </>
+})
 
-                & > div > div
-                  overflow: initial !important
-
-            th
-              top: 64px
-              position: sticky
-      `}</style>
-    </>
-  }
-}
-
-export default Index
+export default Users
