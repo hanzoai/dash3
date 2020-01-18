@@ -15,12 +15,15 @@ module.exports = {
     node: true
   },
   rules: {
+    'no-continue': 'off',
+    'guard-for-in': 'off',
     'jsx-a11y/href-no-hash': ['off'],
     'react/jsx-filename-extension': ['warn', { extensions: ['.js', '.jsx'] }],
     'react/jsx-props-no-spreading': 'off',
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     'no-plusplus': 'off',
+    'no-restricted-syntax': 'off',
     'jsx-quotes': ['warn', 'prefer-single'],
     'import-order-alphabetical/order': 'warn',
     'no-param-reassign': ['error', { props: false }],

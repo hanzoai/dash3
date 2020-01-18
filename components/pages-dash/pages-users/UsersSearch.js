@@ -29,25 +29,9 @@ import { useMidstream } from '../../../src/hooks'
 import { useStore } from '../../../stores'
 
 import { MUITable } from '../../tables'
+import searchStyle from '../searchStyle'
 
-const useStyles = makeStyles((theme) => ({
-  searchForm: {
-    position: 'sticky',
-    top: 64,
-    zIndex: 1000,
-    background: theme.palette.background.paper,
-    paddingTop: 16,
-    marginTop: -16,
-  },
-  searchLine: {
-    margin: 0,
-    padding: '0 16px',
-    width: '100%',
-  },
-  expand: {
-    borderRadius: '0 !important',
-  },
-}))
+const useStyles = makeStyles(searchStyle)
 
 const columns = [
   {
@@ -200,7 +184,13 @@ const UsersTable = () => {
     ),
   }
 
-  console.log('isLoading', isLoading, usersStore.isLoading, disabled)
+  const onEnter = (ev) => {
+    if (ev.key === 'Enter') {
+      search()
+      ev.preventDefault()
+    }
+  }
+
 
   return useObserver(() => (
     <div>
@@ -219,6 +209,7 @@ const UsersTable = () => {
               shrink
               value={dst.q}
               setValue={hooks.q[1]}
+              onKeyPress={onEnter}
               InputProps={SearchInputProps}
             />
           </Grid>
@@ -391,8 +382,7 @@ const UsersTable = () => {
           </ExpansionPanelDetails>
         </ExpansionPanel>
       </div>
-      <br />
-      <div className='.users-table.table'>
+      <div className={classes.table}>
         <MUITable
           tableRef={tableRef}
           columns={columns}

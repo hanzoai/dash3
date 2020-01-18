@@ -4,7 +4,7 @@
   "description": "Dash 3",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=production next -p 3001",
+    "dev": "next -p 3001",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
     "start": "NODE_ENV=production node server.js",

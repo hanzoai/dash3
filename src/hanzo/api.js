@@ -1,9 +1,10 @@
 import Hanzo from 'hanzo.js'
+import { observable, computed } from 'mobx'
 import blueprints from './blueprints'
-import { action, observable, computed, autorun, runInAction } from "mobx"
 
 export default class Api {
   @observable key = ''
+
   @observable endpoint = ''
 
   constructor(key, endpoint) {
@@ -11,15 +12,14 @@ export default class Api {
     this.endpoint = endpoint
   }
 
-  @computed get client () {
-    let client = new Hanzo.Api({ key: this.key, endpoint: this.endpoint })
+  @computed get client() {
+    const client = new Hanzo.Api({ key: this.key, endpoint: this.endpoint })
 
-    for (let k in blueprints) {
-      let v = blueprints[k]
+    for (const k in blueprints) {
+      const v = blueprints[k]
       client.addBlueprints(k, v)
     }
 
     return client
   }
 }
-

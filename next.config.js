@@ -21,6 +21,7 @@ module.exports = withBundleAnalyzer(
           ])
         ]
       },
+      mode: 'production',
       webpack: (config, { defaultLoaders, isServer }) => {
         resolve = {
           mainFields: ['module', 'browser', 'main']

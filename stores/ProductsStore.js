@@ -1,22 +1,32 @@
-import { action, observable, computed, autorun, runInAction } from "mobx"
-
-import akasha from 'akasha'
-import { renderDate, rfc3339 } from '@hanzo/utils'
+import {
+  action,
+  observable,
+  runInAction,
+} from 'mobx'
 
 import capitalize from '../src/string/capitalize'
 
 export default class ProductsStore {
   @observable query = undefined
+
   @observable searchTokens = {}
+
   @observable page = 1
+
   @observable display = 10
+
   @observable total = 0
+
   @observable products = []
+
   @observable triggerNewSearch = false
+
   @observable sort = undefined
 
   @observable productId = undefined
+
   @observable product = {}
+
   @observable errors = {}
 
   @observable isLoading = false
@@ -31,7 +41,7 @@ export default class ProductsStore {
     this.productId = id || this.productId
 
     try {
-      let res = await this.api.client.product.get(this.productId)
+      const res = await this.api.client.product.get(this.productId)
 
       runInAction(() => {
         this.product = Object.assign(this.product, res)
@@ -41,7 +51,7 @@ export default class ProductsStore {
         }
         this.isLoading = false
       })
-    } catch(e) {
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -54,13 +64,13 @@ export default class ProductsStore {
     this.isLoading = true
 
     try {
-      let res = await this.api.client.product.update(this.product)
+      const res = await this.api.client.product.update(this.product)
 
       runInAction(() => {
         this.product = res
         this.isLoading = false
       })
-    } catch(e) {
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -73,13 +83,13 @@ export default class ProductsStore {
     this.isLoading = true
 
     try {
-      let res = await this.api.client.product.create(this.product)
+      const res = await this.api.client.product.create(this.product)
 
       runInAction(() => {
         this.product = res
         this.isLoading = false
       })
-    } catch(e) {
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -91,8 +101,8 @@ export default class ProductsStore {
   @action async listProducts(page, display, query) {
     this.isLoading = true
 
-    this.query   = query || this.query
-    this.page    = page  || this.page
+    this.query = query || this.query
+    this.page = page || this.page
     this.display = display || this.display
 
     if (!this.query || !this.page || !this.display) {
@@ -109,10 +119,10 @@ export default class ProductsStore {
         display: this.display,
       }
 
-      let q = []
+      const q = []
 
-      for (let k in this.searchTokens) {
-        let v = this.searchTokens[k]
+      for (const k in this.searchTokens) {
+        const v = this.searchTokens[k]
 
         // special case query string
         if (k === 'q') {
@@ -120,6 +130,7 @@ export default class ProductsStore {
             console.log(k, v)
             q.push(v)
           }
+
           continue
         }
 
@@ -136,16 +147,14 @@ export default class ProductsStore {
         opts.sort = this.sort
       }
 
-      console.log('opts', opts)
-
-      let res = await this.api.client.product.list(opts)
+      const res = await this.api.client.product.list(opts)
 
       runInAction(() => {
         this.products = res.models
         this.count = parseInt(res.count, 10)
         this.isLoading = false
       })
-    } catch(e) {
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -153,13 +162,29 @@ export default class ProductsStore {
       throw e
     }
 
-    console.log('display', this.display)
+    const ps = []
+    for (const product of this.products) {
+      ps.push(this.api.client.counter.search({
+        tag: `damon_sold_${product.id}_prod_all`,
+        period: 'total',
+      }))
+    }
+
+    try {
+      const res = await Promise.all(ps)
+      for (const k in this.products) {
+        this.products[k].sold = res[k].count
+      }
+    } catch (e) {
+      console.log('counter error', e)
+      throw e
+    }
 
     return {
-      models:  this.products,
-      page:    this.page,
+      models: this.products,
+      page: this.page,
       display: this.display,
-      count:   this.count,
+      count: this.count,
     }
   }
 }

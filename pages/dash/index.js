@@ -2,7 +2,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import React from 'react'
 
 import { isLoggedIn } from '../../components/pages'
-import UsersSearch from '../../components/pages-dash/pages-users/UsersSearch'
+import { UsersSearch } from '../../components/pages-dash'
 
 const useStyles = makeStyles((theme) => ({
   main: {

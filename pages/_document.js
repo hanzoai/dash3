@@ -1,9 +1,9 @@
 import React from 'react'
 import Document, { Html, Head, Main, NextScript } from 'next/document'
 
-// if (process) {
-//   console.log(process.env)
-// }
+if (process) {
+  console.log(process.env.NODE_ENV)
+}
 
 export default class MyDocument extends Document {
 

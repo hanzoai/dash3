@@ -1,18 +1,32 @@
-import { action, observable, computed, autorun, runInAction } from "mobx"
-
 import akasha from 'akasha'
+
+import {
+  action,
+  autorun,
+  computed,
+  observable,
+  runInAction,
+} from 'mobx'
 
 export default class CredentialStore {
   @observable user = undefined
+
   @observable orgs = undefined
-  @observable org  = undefined
+
+  @observable org = undefined
+
   @observable integrations = []
+
   @observable activeOrg = -1
+
   @observable isLoading = false
 
   @observable email = ''
+
   @observable password = ''
+
   @observable remember = true
+
   @observable errors = {}
 
   constructor(data, hanzoApi) {
@@ -34,7 +48,7 @@ export default class CredentialStore {
   }
 
   hasIntegration(type) {
-    for (let integration of this.integrations) {
+    for (const integration of this.integrations) {
       console.log('inte', integration)
       if (integration.type === type) {
         return true
@@ -53,8 +67,8 @@ export default class CredentialStore {
   }
 
   @action load() {
-    this.user      = akasha.get('credentials.user')
-    this.orgs      = akasha.get('credentials.orgs')
+    this.user = akasha.get('credentials.user')
+    this.orgs = akasha.get('credentials.orgs')
     this.activeOrg = akasha.get('credentials.activeOrg')
   }
 
@@ -62,12 +76,12 @@ export default class CredentialStore {
     this.isLoading = true
 
     try {
-      let ps = [
+      const ps = [
         this.api.client.organization.get(this.orgStub.id),
         this.api.client.organization.getIntegrations(this.orgStub.id),
       ]
 
-      let [ org, integrations ] = await Promise.all(ps)
+      const [org, integrations] = await Promise.all(ps)
 
       runInAction(() => {
         this.org = org
@@ -98,8 +112,8 @@ export default class CredentialStore {
         this.username = ''
         this.password = ''
 
-        this.user = res.user,
-        this.orgs = res.organizations,
+        this.user = res.user
+        this.orgs = res.organizations
         this.activeOrg = 0
         this.isLoading = false
 
