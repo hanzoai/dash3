@@ -1,336 +1,356 @@
-import { Component } from 'react'
-import { inject, observer } from 'mobx-react'
-import midstream from 'midstream'
-import Router from 'next/router'
+import {
+  isRequired,
+  isStateRequiredForCountry,
+} from '@hanzo/middleware'
 
 import {
   MUIText,
-  MUIKeyboardDatePicker,
-  MUIPhone,
-  MUISwitch,
 } from '@hanzo/react'
+
+import {
+  assignPath,
+  getPath,
+  renderUIDate,
+} from '@hanzo/utils'
 
 import {
   Button,
   Card,
   CardContent,
-  Typography,
   Grid,
+  Typography,
 } from '@material-ui/core'
 
 import {
-  getPath,
-  assignPath,
-  renderUIDate,
-} from '@hanzo/utils'
+  makeStyles,
+} from '@material-ui/core/styles'
+
+import { observer } from 'mobx-react'
+
+import Router from 'next/router'
+
+import React, { useState } from 'react'
 
 import {
-  KYC_STATUS_OPTIONS
-} from '../../../src/consts'
+  renderUICurrencyFromJSON,
+} from '../../../src/currency'
+import { useMidstream } from '../../../src/hooks'
+import { useStore } from '../../../stores'
 
-import classnames from 'classnames'
+const useStyles = makeStyles(() => (
+  {
+    right: {
+      textAlign: 'right',
+    },
+  }
+))
 
-import {
-  isRequired,
-  isStateRequiredForCountry,
-  isEmail,
-  isPhone
-} from '@hanzo/middleware'
+const OrderForm = observer((props) => {
+  const classes = useStyles()
 
-@inject("store")
-@observer
-class ProductForm extends Component {
-  constructor(props) {
-    super(props)
+  const {
+    settingsStore,
+    ordersStore,
+  } = useStore()
 
-    let {
-      productsStore,
-      settingsStore,
-    } = props.store
+  const { doCreate } = props
 
-    this.ms = midstream({
-      firstName: [isRequired],
-      lastName:  [isRequired],
-      email:     [isRequired, isEmail],
-      'kyc.gender':    [isRequired],
-      'kyc.birthdate': [isRequired],
-      'kyc.taxId':     [isRequired],
-      'kyc.phone':     [isRequired, isPhone],
-      'kyc.address.line1': [isRequired],
-      'kyc.address.line2': [],
-      'kyc.address.city':  [isRequired],
-      'kyc.address.postalCode': [isRequired],
-      'kyc.address.state':      [
-        isStateRequiredForCountry(
-          () => settingsStore.stateOptions,
-          () => (productsStore.product.kyc && productsStore.product.kyc.address) ? productsStore.product.kyc.address.country : undefined,
-        )
-      ],
-      'kyc.address.country':    [isRequired],
-      'kyc.flagged': [],
-      'kyc.frozen':  [],
-      'kyc.status':  [isRequired],
-    }, {
-      dst: assignPath(productsStore.product),
-      errors: productsStore.errors,
-    })
+  const [error, setError] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-    this.state = {
-      error: false,
-      isLoading: false
-    }
+  const { order, errors } = ordersStore
+
+  const ms = useMidstream({
+    email: [isRequired],
+    status: [isRequired],
+    paymentStatus: [isRequired],
+    'shippingAddress.name': [isRequired],
+    'shippingAddress.line1': [isRequired],
+    'shippingAddress.line2': [],
+    'shippingAddress.city': [isRequired],
+    'shippingAddress.postalCode': [isRequired],
+    'shippingAddress.state': [
+      isStateRequiredForCountry(
+        () => settingsStore.stateOptions,
+        () => ((ordersStore.order && ordersStore.order.shippingAddress) ? ordersStore.order.shippingAddress.country : undefined),
+      ),
+    ],
+    'shippingAddress.country': [isRequired],
+  }, {
+    order: assignPath(order),
+    errors: ordersStore.errors,
+  })
+
+  if (props.doCreate) {
+    ordersStore.order = undefined
   }
 
-  async submit() {
-    this.setState({
-      error: false,
-      isLoading: true,
-    })
+  const {
+    hooks,
+    run,
+    setEmail,
+    setStatus,
+    setPaymentStatus,
+  } = ms
 
-    const doCreate = this.props.doCreate
-    const productsStore = this.props.store.productsStore
+  const submit = async () => {
+    setError(false)
+    setIsLoading(true)
 
     try {
-      await this.ms.source.runAll()
-      await doCreate ? productsStore.createProduct() : productsStore.updateProduct()
-      Router.push('/dash/product?id='+productsStore.product.id)
+      await run()
+      const o = await (doCreate ? ordersStore.createOrder() : ordersStore.updateOrder())
+      Router.push(`/dash/order?id=${o.id}`)
     } catch (e) {
-      console.log('product update error', e)
-      this.setState({
-        error: e.message || e,
-      })
+      console.log('order update error', e)
+      setError(e.message || e)
     }
 
-    this.setState({
-        isLoading: false,
-    })
+    setIsLoading(false)
   }
 
-  render() {
-    const productsStore = this.props.store.productsStore
-    const settingsStore = this.props.store.settingsStore
-    const product = productsStore.product
+  const disabled = isLoading || ordersStore.isLoading
 
-    const { hooks, errors } = this.ms
-    const { error, isLoading } = this.state
-    const disabled = isLoading || productsStore.isLoading
+  return (
+    <Grid container justify='center' alignItems='flex-start' spacing={2}>
+      <Grid item xs={12}>
+        { !doCreate
+          && <Card>
+            <CardContent>
+              <Typography variant='h6'>
+                Statistics
+              </Typography>
+              <Grid container>
+                <Grid item xs={4}>
+                  <Typography variant='body1'>
+                    ID
+                  </Typography>
+                  <Typography variant='body2'>
+                    { order.id }
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant='body1'>
+                    Created At
+                  </Typography>
+                  <Typography variant='body2'>
+                    { renderUIDate(order.createdAt) }
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant='body1'>
+                    Updated At
+                  </Typography>
+                  <Typography variant='body2'>
+                    { renderUIDate(order.updatedAt) }
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        }
+      </Grid>
+      <Grid item xs={6}>
+        <Card>
+          <CardContent>
+            <Grid container justify='center' alignItems='flex-start' spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant='h6'>
+                  Order Information
+                </Typography>
+                { error
+                  && <div className='error'>
+                    { error }
+                  </div>
+                }
+              </Grid>
+              <Grid item xs={6}>
+                <MUIText
+                  label='Email'
+                  variant='outlined'
+                  disabled={disabled}
+                  value={order.email}
+                  error={errors.email}
+                  setValue={setEmail}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <MUIText
+                  label='Name'
+                  variant='outlined'
+                  disabled={disabled}
+                  value={getPath(order, 'shippingAddress.name')}
+                  error={errors['shippingAddress.name']}
+                  setValue={hooks['shippingAddress.name'][1]}
+                />
+              </Grid>
+              <Grid item xs={9}>
+                <MUIText
+                  label='Address'
+                  variant='outlined'
+                  disabled={disabled}
+                  value={getPath(order, 'shippingAddress.line1')}
+                  error={errors['shippingAddress.line1']}
+                  setValue={hooks['shippingAddress.line1'][1]}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <MUIText
+                  label='Suite'
+                  variant='outlined'
+                  disabled={disabled}
+                  value={getPath(order, 'shippingAddress.line2')}
+                  error={errors['shippingAddress.line1']}
+                  setValue={hooks['shippingAddress.line1'][1]}
+                />
+              </Grid>
+              <Grid item xs={8}>
+                <MUIText
+                  label='City'
+                  variant='outlined'
+                  disabled={disabled}
+                  value={getPath(order, 'shippingAddress.city')}
+                  error={errors['shippingAddress.city']}
+                  setValue={hooks['shippingAddress.city'][1]}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <MUIText
+                  label='ZIP/Postal Code'
+                  variant='outlined'
+                  disabled={disabled}
+                  value={getPath(order, 'shippingAddress.postalCode')}
+                  error={errors['shippingAddress.postalCode']}
+                  setValue={hooks['shippingAddress.postalCode'][1]}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <MUIText
+                  label='Region/State'
+                  select
+                  options={settingsStore.stateOptions[getPath(order, 'shippingAddress.country')]}
+                  variant='outlined'
+                  disabled={disabled}
+                  placeholder='Select a State'
+                  value={getPath(order, 'shippingAddress.state')}
+                  error={errors['shippingAddress.state']}
+                  setValue={hooks['shippingAddress.state'][1]}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <MUIText
+                  label='Country'
+                  select
+                  options={settingsStore.countryOptions}
+                  variant='outlined'
+                  disabled={disabled}
+                  placeholder='Select a Country'
+                  value={getPath(order, 'shippingAddress.country')}
+                  error={errors['shippingAddress.country']}
+                  setValue={hooks['shippingAddress.country'][1]}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  size='large'
+                  variant='contained'
+                  color='primary'
+                  type='submit'
+                  disabled={disabled}
+                  onClick={submit}
+                >
+                  { doCreate ? 'Create' : 'Save' }
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={6}>
+        <Card>
+          <CardContent>
+            <Typography variant='h6'>
+              Receipt
+            </Typography>
+            <Grid container>
+              <Grid item xs={12}>
+                <Typography variant='body1'>
+                  Number
+                </Typography>
+                <Typography variant='body2'>
+                  { order.number }
+                </Typography>
+                <br />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant='body1'>
+                  Items
+                </Typography>
+              </Grid>
+              { order.items && order.items.map((item) => (
+                <>
+                  <Grid item xs={8}>
+                    <Typography variant='body2'>
+                      {item.quantity} x { item.productName }
+                    </Typography>
+                    <br />
+                  </Grid>
+                  <Grid item xs={4} className={classes.right}>
+                    <Typography variant='body2'>
+                      { renderUICurrencyFromJSON(item.currency, item.price) }
+                    </Typography>
+                    <br />
+                  </Grid>
+                </>
+              ))}
+              <Grid item xs={6}>
+                <Typography variant='body2'>
+                  <strong>Subtotal</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={6} className={classes.right}>
+                <Typography variant='body2'>
+                  { renderUICurrencyFromJSON(order.currency, order.subtotal) }
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant='body2'>
+                  <strong>Discount</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={6} className={classes.right}>
+                <Typography variant='body2'>
+                  { renderUICurrencyFromJSON(order.currency, order.discount) }
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant='body2'>
+                  <strong>Total</strong>
+                </Typography>
+                <br />
+              </Grid>
+              <Grid item xs={6} className={classes.right}>
+                <Typography variant='body2'>
+                  { renderUICurrencyFromJSON(order.currency, order.total) }
+                </Typography>
+                <br />
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant='body2'>
+                  <strong>Paid</strong>
+                </Typography>
+              </Grid>
+              <Grid item xs={6} className={classes.right}>
+                <Typography variant='body2'>
+                  { renderUICurrencyFromJSON(order.currency, order.paid) }
+                </Typography>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
+  )
+})
 
-    const doCreate = this.props.doCreate
-
-    return pug`
-      div.product-form.form
-        Grid(container justify='center' alignItems='flex-start' spacing=2)
-          Grid(item xs=6)
-            Card
-              CardContent
-                Typography(variant='h6')
-                  | Photo
-            br
-            if !doCreate
-              Card
-                CardContent
-                  Typography(variant='h6')
-                    | Statistics
-                  Grid(container)
-                    Grid(item xs=4)
-                      Typography(variant='body1')
-                        | ID
-                      Typography(variant='body2')
-                        =product.id
-                    Grid(item xs=4)
-                      Typography(variant='body1')
-                        | Created At
-                      Typography(variant='body2')
-                        =renderUIDate(product.createdAt)
-                    Grid(item xs=4)
-                      Typography(variant='body1')
-                        | Updated At
-                      Typography(variant='body2')
-                        =renderUIDate(product.updatedAt)
-          Grid(item xs=6)
-            Card
-              CardContent
-                Grid(container justify='center' alignItems='flex-start' spacing=2).product-form.form
-                  Grid(item xs=12)
-                    Typography(variant='h6')
-                      | Personal Information
-                    .error
-                      =error
-                  Grid(item xs=12)
-                    MUIText(
-                      label='Email'
-                      variant='outlined'
-                      disabled=disabled
-                      value=product.email
-                      error=errors.email
-                      setValue=hooks.email[1]
-                    )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='First Name'
-                      variant='outlined'
-                      disabled=disabled
-                      value=product.firstName
-                      error=errors.firstName
-                      setValue=hooks.firstName[1]
-                    )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Last Name'
-                      variant='outlined'
-                      disabled=disabled
-                      value=product.lastName
-                      error=errors.lastName
-                      setValue=hooks.lastName[1]
-                    )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Gender'
-                      select
-                      options=settingsStore.genderOptions
-                      variant='outlined'
-                      disabled=disabled
-                      placeholder='Select a Gender'
-                      value=getPath(product, 'kyc.gender')
-                      error=errors['kyc.gender']
-                      setValue=hooks['kyc.gender'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIKeyboardDatePicker(
-                      label='Date of Birth'
-                      inputVariant='outlined'
-                      disabled=disabled
-                      value=getPath(product, 'kyc.birthdate')
-                      error=errors['kyc.birthdate']
-                      setValue=hooks['kyc.birthdate'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Tax Id(SSN)'
-                      sensitive
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(product, 'kyc.taxId')
-                      error=errors['kyc.taxId']
-                      setValue=hooks['kyc.taxId'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIPhone(
-                      label='Phone'
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(product, 'kyc.phone')
-                      error=errors['kyc.phone']
-                      inputValue=hooks['kyc.phone'][1]
-                    )
-                  Grid(item xs=12)
-                    br
-                    Typography(variant='h6')
-                      | Contact Information
-                  Grid(item xs=9)
-                    MUIText(
-                      label='Address'
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(product, 'kyc.address.line1')
-                      error=errors['kyc.address.line1']
-                      setValue=hooks['kyc.address.line1'][1]
-                    )
-                  Grid(item xs=3)
-                    MUIText(
-                      label='Suite'
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(product, 'kyc.address.line2')
-                      error=errors['kyc.address.line1']
-                      setValue=hooks['kyc.address.line1'][1]
-                    )
-                  Grid(item xs=8)
-                    MUIText(
-                      label='City'
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(product, 'kyc.address.city')
-                      error=errors['kyc.address.city']
-                      setValue=hooks['kyc.address.city'][1]
-                    )
-                  Grid(item xs=4)
-                    MUIText(
-                      label='ZIP/Postal Code'
-                      variant='outlined'
-                      disabled=disabled
-                      value=getPath(product, 'kyc.address.postalCode')
-                      error=errors['kyc.address.postalCode']
-                      setValue=hooks['kyc.address.postalCode'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Region/State'
-                      select
-                      options=settingsStore.stateOptions[getPath(product, 'kyc.address.country')]
-                      variant='outlined'
-                      disabled=disabled
-                      placeholder='Select a State'
-                      value=getPath(product, 'kyc.address.state')
-                      error=errors['kyc.address.state']
-                      setValue=hooks['kyc.address.state'][1]
-                    )
-                  Grid(item xs=6)
-                    MUIText(
-                      label='Country'
-                      select
-                      options=settingsStore.countryOptions
-                      variant='outlined'
-                      disabled=disabled
-                      placeholder='Select a Country'
-                      value=getPath(product, 'kyc.address.country')
-                      error=errors['kyc.address.country']
-                      setValue=hooks['kyc.address.country'][1]
-                    )
-                  Grid(item xs=12)
-                    br
-                    Typography(variant='h6')
-                      | Know Your Customer
-                  Grid(item xs=4)
-                    MUISwitch(
-                      label='Flagged'
-                      disabled=disabled
-                      defaultValue=getPath(product, 'kyc.flagged')
-                      error=errors['kyc.flagged']
-                      setValue=hooks['kyc.flagged'][1]
-                    )
-                  Grid(item xs=4)
-                    MUISwitch(
-                      label='Frozen'
-                      disabled=disabled
-                      defaultValue=getPath(product, 'kyc.frozen')
-                      error=errors['kyc.frozen']
-                      setValue=hooks['kyc.frozen'][1]
-                    )
-                  Grid(item xs=4)
-                    MUIText(
-                      label='Status'
-                      select
-                      options=KYC_STATUS_OPTIONS
-                      variant='outlined'
-                      disabled=disabled
-                      placeholder='Select a Status'
-                      value=getPath(product, 'kyc.status')
-                      error=errors['kyc.status']
-                      setValue=hooks['kyc.status'][1]
-                    )
-                  Grid(item xs=12)
-                    Button(
-                      size='large'
-                      variant='contained'
-                      color='primary'
-                      type='submit'
-                      disabled=disabled
-                      onClick=() => this.submit()
-                    )
-                      =doCreate ? 'Create' : 'Save'
-    `
-  }
-}
-
-export default ProductForm
+export default OrderForm

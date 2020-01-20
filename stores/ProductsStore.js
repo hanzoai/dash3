@@ -43,14 +43,23 @@ export default class ProductsStore {
     try {
       const res = await this.api.client.product.get(this.productId)
 
+      const ps = [this.api.client.counter.search({
+        tag: `damon_sold_${res.id}_prod_all`,
+        period: 'total',
+      })]
+
+      const [sold] = await Promise.all(ps)
+
       runInAction(() => {
-        this.product = Object.assign(this.product, res)
+        this.product = Object.assign(this.product, res, { sold: sold.count })
         // fix gender upper/lower case issues
         if (this.product.kyc && this.product.kyc.gender) {
           this.product.kyc.gender = this.product.kyc.gender.toLowerCase()
         }
         this.isLoading = false
       })
+
+      return this.product
     } catch (e) {
       runInAction(() => {
         this.isLoading = false
@@ -70,6 +79,8 @@ export default class ProductsStore {
         this.product = res
         this.isLoading = false
       })
+
+      return this.product
     } catch (e) {
       runInAction(() => {
         this.isLoading = false
@@ -89,6 +100,8 @@ export default class ProductsStore {
         this.product = res
         this.isLoading = false
       })
+
+      return this.product
     } catch (e) {
       runInAction(() => {
         this.isLoading = false
@@ -158,6 +171,8 @@ export default class ProductsStore {
       runInAction(() => {
         this.isLoading = false
       })
+
+      console.log('list error', e)
 
       throw e
     }

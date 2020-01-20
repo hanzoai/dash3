@@ -67,7 +67,7 @@ class MyDrawer extends Component {
                 Link.columns(href='/dash/orders' color='textPrimary' underline='none')
                   ReceiptIcon
               ListItemText
-                Link(href='/dash/products' color='textPrimary' underline='none')
+                Link(href='/dash/orders' color='textPrimary' underline='none')
                   | Orders
             br
             ListItem

@@ -9,6 +9,7 @@ import { HANZO_ENDPOINT } from '../src/settings'
 
 // Stores
 import CredentialStore from './CredentialStore'
+import OrdersStore from './OrdersStore'
 import ProductsStore from './ProductsStore'
 import SettingsStore from './SettingsStore'
 import UsersStore from './UsersStore'
@@ -35,6 +36,7 @@ export const initStore = (data = defaultData) => {
       settingsStore: new SettingsStore(data.settingsData, api),
       usersStore: new UsersStore(data.userData, api),
       productsStore: new ProductsStore(data.productData, api),
+      ordersStore: new OrdersStore(data.productData, api),
     }
   } else if (!store) {
     // Client stuff
@@ -43,6 +45,7 @@ export const initStore = (data = defaultData) => {
       settingsStore: new SettingsStore(data.settingsData, api),
       usersStore: new UsersStore(data.userData, api),
       productsStore: new ProductsStore(data.productData, api),
+      ordersStore: new OrdersStore(data.productData, api),
     }
   }
 

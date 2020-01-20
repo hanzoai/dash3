@@ -2,7 +2,7 @@ import { Component } from 'react'
 
 import { inject, observer } from 'mobx-react'
 import { isLoggedIn } from '../../components/pages'
-import ProductsSearch from '../../components/pages-dash/pages-products/ProductsSearch'
+import OrdersSearch from '../../components/pages-dash/pages-orders/OrdersSearch'
 
 import {
   Grid,
@@ -24,16 +24,16 @@ class Index extends Component {
   render() {
     return <> {
       pug`
-        main#dash.products
-          ProductsSearch
+        main#dash.orders
+          OrdersSearch
       `}
       <style jsx global>{`
-        #dash.products
+        #dash.orders
           padding-left: 200px
           padding-top: 80px
           width: 100vw
 
-          .products-search-form
+          .orders-search-form
             padding: 0 8px
             width: 100%
             margin: 0

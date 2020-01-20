@@ -1,9 +1,10 @@
 import midstream from 'midstream'
-import { useEffect, useState } from 'react'
+import { isFunction } from '@hanzo/utils'
+import { useState } from 'react'
 
 export const useMidstream = (config, opts) => {
-  const dst = opts.dst || {}
-  const err = opts.err || {}
+  const [dst, setDst] = useState(() => opts.dst || opts.destination || {})
+  const [err, setErr] = useState(() => opts.err || opts.errors || {})
 
   // standard force rerender hack
   const [, setTick] = useState(0)
@@ -13,12 +14,20 @@ export const useMidstream = (config, opts) => {
 
     return midstream(config, {
       dst: (name, value) => {
-        dst[name] = value
+        if (isFunction(dst)) {
+          dst(name, value)
+        } else {
+          dst[name] = value
+        }
         setTick(tick++)
       },
       // err behaves just like dst
       err: (name, value) => {
-        err[name] = value
+        if (isFunction(err)) {
+          err(name, value)
+        } else {
+          err[name] = value
+        }
         setTick(tick++)
       },
     })
@@ -30,7 +39,7 @@ export const useMidstream = (config, opts) => {
     get dst() {
       return dst
     },
-    get err() {
+    get errors() {
       return err
     },
   })

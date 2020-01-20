@@ -19,7 +19,7 @@ import {
   Search as SearchIcon,
 } from '@material-ui/icons'
 
-import { useObserver } from 'mobx-react'
+import { observer } from 'mobx-react'
 import moment from 'moment-timezone'
 import Router from 'next/router'
 
@@ -68,17 +68,17 @@ const columns = [
   },
   {
     title: 'Created',
-    field: 'shippingAddressCreated',
+    field: 'createdAt',
     render: (row) => renderDate(row.createdAt),
   },
   {
     title: 'Updated',
-    field: 'shippingAddressUpdated',
+    field: 'updatedAt',
     render: (row) => moment(row.updatedAt).fromNow(),
   },
 ]
 
-const UsersTable = () => {
+const UsersTable = observer(() => {
   const tableRef = useRef(null)
   const classes = useStyles()
   const {
@@ -192,7 +192,7 @@ const UsersTable = () => {
   }
 
 
-  return useObserver(() => (
+  return (
     <div>
       <div className={classes.searchForm}>
         { error
@@ -395,7 +395,7 @@ const UsersTable = () => {
         />
       </div>
     </div>
-  ))
-}
+  )
+})
 
 export default UsersTable

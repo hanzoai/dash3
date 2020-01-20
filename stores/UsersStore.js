@@ -7,16 +7,25 @@ import capitalize from '../src/string/capitalize'
 
 export default class UsersStore {
   @observable query = undefined
+
   @observable searchTokens = {}
+
   @observable page = 1
+
   @observable display = 10
+
   @observable total = 0
+
   @observable users = []
+
   @observable triggerNewSearch = false
+
   @observable sort = undefined
 
   @observable userId = undefined
+
   @observable user = {}
+
   @observable errors = {}
 
   @observable isLoading = false
@@ -31,7 +40,7 @@ export default class UsersStore {
     this.userId = id || this.userId
 
     try {
-      let res = await this.api.client.user.get(this.userId)
+      const res = await this.api.client.user.get(this.userId)
 
       runInAction(() => {
         this.user = Object.assign(this.user, res)
@@ -42,8 +51,8 @@ export default class UsersStore {
         this.isLoading = false
       })
 
-      return res
-    } catch(e) {
+      return this.user
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -56,15 +65,15 @@ export default class UsersStore {
     this.isLoading = true
 
     try {
-      let res = await this.api.client.user.update(this.user)
+      const res = await this.api.client.user.update(this.user)
 
       runInAction(() => {
         this.user = res
         this.isLoading = false
       })
 
-      return res
-    } catch(e) {
+      return this.user
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -77,15 +86,15 @@ export default class UsersStore {
     this.isLoading = true
 
     try {
-      let res = await this.api.client.user.create(this.user)
+      const res = await this.api.client.user.create(this.user)
 
       runInAction(() => {
         this.user = res
         this.isLoading = false
       })
 
-      return res
-    } catch(e) {
+      return this.user
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -98,8 +107,8 @@ export default class UsersStore {
     console.log(query)
     this.isLoading = true
 
-    this.query   = query || this.query
-    this.page    = page  || this.page
+    this.query = query || this.query
+    this.page = page || this.page
     this.display = display || this.display
 
     if (!this.query || !this.page || !this.display) {
@@ -116,10 +125,10 @@ export default class UsersStore {
         display: this.display,
       }
 
-      let q = []
+      const q = []
 
-      for (let k in this.searchTokens) {
-        let v = this.searchTokens[k]
+      for (const k in this.searchTokens) {
+        const v = this.searchTokens[k]
 
         // special case query string
         if (k === 'q') {
@@ -145,27 +154,29 @@ export default class UsersStore {
 
       console.log('opts', opts)
 
-      let res = await this.api.client.user.list(opts)
+      const res = await this.api.client.user.list(opts)
 
       runInAction(() => {
         this.users = res.models
         this.count = parseInt(res.count, 10)
+        this.isLoading = false
       })
-    } catch(e) {
+    } catch (e) {
+      runInAction(() => {
+        this.isLoading = false
+      })
+
+      console.log('list error', e)
       throw e
     }
-
-    runInAction(() => {
-      this.isLoading = false
-    })
 
     console.log('display', this.display, this.isLoading)
 
     return {
-      models:  this.users,
-      page:    this.page,
+      models: this.users,
+      page: this.page,
       display: this.display,
-      count:   this.count,
+      count: this.count,
     }
   }
 }

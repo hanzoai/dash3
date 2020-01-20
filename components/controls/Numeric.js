@@ -12,7 +12,6 @@ export const CreateCurrencyFormat = (currency) => {
       ...other
     } = props
 
-    console.log('value', props)
     return (
       <NF
         {...other}

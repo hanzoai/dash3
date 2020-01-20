@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@material-ui/core'
 
-import { useObserver } from 'mobx-react'
+import { observer } from 'mobx-react'
 
 import Router from 'next/router'
 
@@ -31,7 +31,7 @@ import React, { useState } from 'react'
 import { useMidstream } from '../../../src/hooks'
 import { useStore } from '../../../stores'
 
-const UserForm = (props) => {
+const UserForm = observer((props) => {
   const {
     settingsStore,
     usersStore,
@@ -69,12 +69,14 @@ const UserForm = (props) => {
     usersStore.user = undefined
   }
 
+  const { hooks, errors, run } = ms
+
   const submit = async () => {
     setError(false)
     setIsLoading(true)
 
     try {
-      await this.ms.source.runAll()
+      await run()
       const user = await (doCreate ? usersStore.createUser() : usersStore.updateUser())
       Router.push(`/dash/user?id=${user.id}`)
     } catch (e) {
@@ -87,12 +89,11 @@ const UserForm = (props) => {
 
   const { user } = usersStore
 
-  const { hooks, errors } = ms
   const disabled = isLoading || usersStore.isLoading
 
-  return useObserver(() => (
+  return (
     <Grid container justify='center' alignItems='flex-start' spacing={2}>
-      <Grid item xs={6}>
+      <Grid item xs={12}>
         { !doCreate
           && <Card>
             <CardContent>
@@ -128,7 +129,8 @@ const UserForm = (props) => {
             </CardContent>
           </Card>
         }
-        <br />
+      </Grid>
+      <Grid item xs={12}>
         <Card>
           <CardContent>
             <Grid container justify='center' alignItems='flex-start' spacing={2}>
@@ -172,23 +174,11 @@ const UserForm = (props) => {
                   setValue={hooks.lastName[1]}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <Button
-                  size='large'
-                  variant='contained'
-                  color='primary'
-                  type='submit'
-                  disabled={disabled}
-                  onClick={() => submit()}
-                >
-                  { doCreate ? 'Create' : 'Save' }
-                </Button>
-              </Grid>
             </Grid>
           </CardContent>
         </Card>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={12}>
         <Card>
           <CardContent>
             <Grid container justify='center' alignItems='flex-start' spacing={2}>
@@ -270,7 +260,7 @@ const UserForm = (props) => {
                   color='primary'
                   type='submit'
                   disabled={disabled}
-                  onClick={() => this.submit()}
+                  onClick={submit}
                 >
                   { doCreate ? 'Create' : 'Save' }
                 </Button>
@@ -281,7 +271,7 @@ const UserForm = (props) => {
       </Grid>
       <Grid item xs={6}/>
     </Grid>
-  ))
-}
+  )
+})
 
 export default UserForm

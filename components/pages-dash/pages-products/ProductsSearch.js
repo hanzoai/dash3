@@ -19,7 +19,7 @@ import {
   Search as SearchIcon,
 } from '@material-ui/icons'
 
-import { useObserver } from 'mobx-react'
+import { observer } from 'mobx-react'
 import moment from 'moment-timezone'
 import Router from 'next/router'
 
@@ -74,7 +74,7 @@ const columns = [
   },
 ]
 
-const ProductsTable = () => {
+const ProductsTable = observer(() => {
   const tableRef = useRef(null)
   const classes = useStyles()
   const {
@@ -177,7 +177,7 @@ const ProductsTable = () => {
   }
 
 
-  return useObserver(() => (
+  return (
     <div>
       <div className={classes.searchForm}>
         { error
@@ -238,7 +238,7 @@ const ProductsTable = () => {
                 <MUIText
                   label='Slug'
                   type='search'
-                  placeholder='PROD'
+                  placeholder='PROD-ONE'
                   disabled={disabled}
                   shrink
                   value={dst.Slug}
@@ -300,7 +300,7 @@ const ProductsTable = () => {
         />
       </div>
     </div>
-  ))
-}
+  )
+})
 
 export default ProductsTable

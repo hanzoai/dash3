@@ -1,22 +1,32 @@
-import { action, observable, computed, autorun, runInAction } from "mobx"
-
-import akasha from 'akasha'
-import { renderDate, rfc3339 } from '@hanzo/utils'
+import {
+  action,
+  observable,
+  runInAction,
+} from 'mobx'
 
 import capitalize from '../src/string/capitalize'
 
 export default class OrdersStore {
   @observable query = undefined
+
   @observable searchTokens = {}
+
   @observable page = 1
+
   @observable display = 10
+
   @observable total = 0
+
   @observable orders = []
+
   @observable triggerNewSearch = false
+
   @observable sort = undefined
 
   @observable orderId = undefined
+
   @observable order = {}
+
   @observable errors = {}
 
   @observable isLoading = false
@@ -31,7 +41,7 @@ export default class OrdersStore {
     this.orderId = id || this.orderId
 
     try {
-      let res = await this.api.client.order.get(this.orderId)
+      const res = await this.api.client.order.get(this.orderId)
 
       runInAction(() => {
         this.order = Object.assign(this.order, res)
@@ -41,7 +51,9 @@ export default class OrdersStore {
         }
         this.isLoading = false
       })
-    } catch(e) {
+
+      return this.order
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -54,13 +66,15 @@ export default class OrdersStore {
     this.isLoading = true
 
     try {
-      let res = await this.api.client.order.update(this.order)
+      const res = await this.api.client.order.update(this.order)
 
       runInAction(() => {
         this.order = res
         this.isLoading = false
       })
-    } catch(e) {
+
+      return this.order
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -73,13 +87,15 @@ export default class OrdersStore {
     this.isLoading = true
 
     try {
-      let res = await this.api.client.order.create(this.order)
+      const res = await this.api.client.order.create(this.order)
 
       runInAction(() => {
         this.order = res
         this.isLoading = false
       })
-    } catch(e) {
+
+      return this.order
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -91,8 +107,8 @@ export default class OrdersStore {
   @action async listOrders(page, display, query) {
     this.isLoading = true
 
-    this.query   = query || this.query
-    this.page    = page  || this.page
+    this.query = query || this.query
+    this.page = page || this.page
     this.display = display || this.display
 
     if (!this.query || !this.page || !this.display) {
@@ -109,10 +125,10 @@ export default class OrdersStore {
         display: this.display,
       }
 
-      let q = []
+      const q = []
 
-      for (let k in this.searchTokens) {
-        let v = this.searchTokens[k]
+      for (const k in this.searchTokens) {
+        const v = this.searchTokens[k]
 
         // special case query string
         if (k === 'q') {
@@ -120,6 +136,7 @@ export default class OrdersStore {
             console.log(k, v)
             q.push(v)
           }
+
           continue
         }
 
@@ -136,16 +153,14 @@ export default class OrdersStore {
         opts.sort = this.sort
       }
 
-      console.log('opts', opts)
-
-      let res = await this.api.client.order.list(opts)
+      const res = await this.api.client.order.list(opts)
 
       runInAction(() => {
         this.orders = res.models
         this.count = parseInt(res.count, 10)
         this.isLoading = false
       })
-    } catch(e) {
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -153,13 +168,11 @@ export default class OrdersStore {
       throw e
     }
 
-    console.log('display', this.display)
-
     return {
-      models:  this.orders,
-      page:    this.page,
+      models: this.orders,
+      page: this.page,
       display: this.display,
-      count:   this.count,
+      count: this.count,
     }
   }
 }
