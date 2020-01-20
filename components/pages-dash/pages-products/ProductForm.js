@@ -47,6 +47,10 @@ const ProductForm = observer((props) => {
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  if (props.doCreate) {
+    productsStore.product = {}
+  }
+
   const ms = useMidstream({
     slug: [isRequired],
     name: [isRequired],
@@ -60,10 +64,6 @@ const ProductForm = observer((props) => {
     dst: productsStore.product,
     errors: productsStore.errors,
   })
-
-  if (props.doCreate) {
-    productsStore.product = undefined
-  }
 
   const {
     hooks,
@@ -202,7 +202,7 @@ const ProductForm = observer((props) => {
                     inputComponent: CreateCurrencyFormat(currency),
                     endAdornment: <InputAdornment position='end'>{ currency ? currency.toUpperCase() : 'USD'}</InputAdornment>,
                   }}
-                  defaultValue={renderNumericCurrencyFromJSON(currency, dst.price)}
+                  defaultValue={renderNumericCurrencyFromJSON(currency, dst.price) || 0}
                   setValue={(v) => {
                     const value = renderJSONCurrencyFromUI(currency, v)
                     setPrice(value)
@@ -219,7 +219,7 @@ const ProductForm = observer((props) => {
                     inputComponent: CreateCurrencyFormat(currency),
                     endAdornment: <InputAdornment position='end'>{ currency ? currency.toUpperCase() : 'USD'}</InputAdornment>,
                   }}
-                  defaultValue={renderNumericCurrencyFromJSON(currency, dst.listPrice)}
+                  defaultValue={renderNumericCurrencyFromJSON(currency, dst.listPrice) || 0}
                   setValue={(v) => {
                     const value = renderJSONCurrencyFromUI(currency, v)
                     setPrice(value)

@@ -15,7 +15,7 @@ class User extends Component {
     super(props)
 
     this.state = {
-      create: false,
+      create: !props.router.query.id,
     }
   }
 

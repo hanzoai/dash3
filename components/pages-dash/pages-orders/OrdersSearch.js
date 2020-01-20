@@ -228,17 +228,6 @@ const OrdersTable = observer(() => {
               Search
             </Button>
           </Grid>
-          <Grid item>
-            <Button
-              variant='contained'
-              color='secondary'
-              type='submit'
-              disabled={disabled}
-              onClick={create}
-            >
-              Create
-            </Button>
-          </Grid>
         </Grid>
         <ExpansionPanel className={classes.expand}>
           <ExpansionPanelSummary>

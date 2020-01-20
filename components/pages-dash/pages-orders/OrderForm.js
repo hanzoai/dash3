@@ -34,16 +34,64 @@ import React, { useState } from 'react'
 import {
   renderUICurrencyFromJSON,
 } from '../../../src/currency'
+import searchStyle from '../searchStyle'
 import { useMidstream } from '../../../src/hooks'
 import { useStore } from '../../../stores'
+import { MUITable } from '../../tables'
 
-const useStyles = makeStyles(() => (
-  {
+const useStyles = makeStyles((theme) => (
+  Object.assign(searchStyle(theme), {
     right: {
       textAlign: 'right',
     },
-  }
+  })
 ))
+
+const columns = [
+  {
+    title: 'External Id',
+    field: 'id',
+    render: (row) => {
+      if (row.type === 'stripe') {
+        return row.account.chargeId
+      }
+
+      return 'n/a'
+    },
+  },
+  {
+    title: 'Type',
+    field: 'type',
+  },
+  {
+    title: 'Last 4',
+    render: (row) => row.account.lastFour,
+  },
+  {
+    title: 'IP',
+    render: (row) => row.client.ip,
+  },
+  {
+    title: 'Country',
+    render: (row) => row.client.country
+  },
+  {
+    title: 'Status',
+    field: 'status',
+  },
+  {
+    title: 'Fee',
+    render: (row) => renderUICurrencyFromJSON(row.currency, row.fee),
+  },
+  {
+    title: 'Amount',
+    render: (row) => renderUICurrencyFromJSON(row.currency, row.amount),
+  },
+  {
+    title: 'Refunded',
+    render: (row) => renderUICurrencyFromJSON(row.currency, row.amountRefunded),
+  },
+]
 
 const OrderForm = observer((props) => {
   const classes = useStyles()
@@ -57,6 +105,10 @@ const OrderForm = observer((props) => {
 
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  if (props.doCreate) {
+    ordersStore.order = {}
+  }
 
   const { order, errors } = ordersStore
 
@@ -81,8 +133,10 @@ const OrderForm = observer((props) => {
     errors: ordersStore.errors,
   })
 
-  if (props.doCreate) {
-    ordersStore.order = undefined
+  const opts = {
+    search: false,
+    pageSize: order && order.paymentObjects && order.paymentObjects.length,
+    pageSizeOptions: false,
   }
 
   const {
@@ -92,6 +146,16 @@ const OrderForm = observer((props) => {
     setStatus,
     setPaymentStatus,
   } = ms
+
+  const onRowClick = (event, rowData) => {
+    try {
+      if (rowData.type === 'stripe') {
+        window.open(`//dashboard.stripe.com/payments/${rowData.account.chargeId}`, '_blank')
+      }
+    } catch (e) {
+      setError(e.message || e)
+    }
+  }
 
   const submit = async () => {
     setError(false)
@@ -267,87 +331,96 @@ const OrderForm = observer((props) => {
         </Card>
       </Grid>
       <Grid item xs={6}>
-        <Card>
-          <CardContent>
-            <Typography variant='h6'>
-              Receipt
-            </Typography>
-            <Grid container>
-              <Grid item xs={12}>
-                <Typography variant='body1'>
-                  Number
+        { !doCreate
+          && <Card>
+              <CardContent>
+                <Typography variant='h6'>
+                  Receipt
                 </Typography>
-                <Typography variant='body2'>
-                  { order.number }
-                </Typography>
-                <br />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant='body1'>
-                  Items
-                </Typography>
-              </Grid>
-              { order.items && order.items.map((item) => (
-                <>
-                  <Grid item xs={8}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    <Typography variant='body1'>
+                      Number
+                    </Typography>
                     <Typography variant='body2'>
-                      {item.quantity} x { item.productName }
+                      { order.number }
                     </Typography>
                     <br />
                   </Grid>
-                  <Grid item xs={4} className={classes.right}>
+                  <Grid item xs={12}>
+                    <Typography variant='body1'>
+                      Items
+                    </Typography>
+                  </Grid>
+                  { order.items && order.items.map((item) => (
+                    <>
+                      <Grid item xs={8}>
+                        <Typography variant='body2'>
+                          {item.quantity} x { item.productName }
+                        </Typography>
+                        <br />
+                      </Grid>
+                      <Grid item xs={4} className={classes.right}>
+                        <Typography variant='body2'>
+                          { renderUICurrencyFromJSON(item.currency, item.price) }
+                        </Typography>
+                        <br />
+                      </Grid>
+                    </>
+                  ))}
+                  <Grid item xs={6}>
                     <Typography variant='body2'>
-                      { renderUICurrencyFromJSON(item.currency, item.price) }
+                      <strong>Subtotal</strong>
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} className={classes.right}>
+                    <Typography variant='body2'>
+                      { renderUICurrencyFromJSON(order.currency, order.subtotal) }
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant='body2'>
+                      <strong>Discount</strong>
                     </Typography>
                     <br />
                   </Grid>
-                </>
-              ))}
-              <Grid item xs={6}>
-                <Typography variant='body2'>
-                  <strong>Subtotal</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={6} className={classes.right}>
-                <Typography variant='body2'>
-                  { renderUICurrencyFromJSON(order.currency, order.subtotal) }
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant='body2'>
-                  <strong>Discount</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={6} className={classes.right}>
-                <Typography variant='body2'>
-                  { renderUICurrencyFromJSON(order.currency, order.discount) }
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant='body2'>
-                  <strong>Total</strong>
-                </Typography>
-                <br />
-              </Grid>
-              <Grid item xs={6} className={classes.right}>
-                <Typography variant='body2'>
-                  { renderUICurrencyFromJSON(order.currency, order.total) }
-                </Typography>
-                <br />
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant='body2'>
-                  <strong>Paid</strong>
-                </Typography>
-              </Grid>
-              <Grid item xs={6} className={classes.right}>
-                <Typography variant='body2'>
-                  { renderUICurrencyFromJSON(order.currency, order.paid) }
-                </Typography>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
+                  <Grid item xs={6} className={classes.right}>
+                    <Typography variant='body2'>
+                      { renderUICurrencyFromJSON(order.currency, order.discount) }
+                    </Typography>
+                    <br />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant='body2'>
+                      <strong>Total</strong>
+                    </Typography>
+                    <br />
+                  </Grid>
+                  <Grid item xs={6} className={classes.right}>
+                    <Typography variant='body2'>
+                      { renderUICurrencyFromJSON(order.currency, order.total) }
+                    </Typography>
+                    <br />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+        }
+      </Grid>
+      <Grid item xs={12}>
+        { !doCreate && order.paymentObjects
+          && <div className={classes.table}>
+              <MUITable
+                columns={columns}
+                options={opts}
+                isLoading={ordersStore.isLoading}
+                initialPage={0}
+                data={order.paymentObjects}
+                title='Payments'
+                onRowClick={onRowClick}
+              />
+            </div>
+        }
       </Grid>
     </Grid>
   )

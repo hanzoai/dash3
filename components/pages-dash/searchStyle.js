@@ -20,6 +20,12 @@ export default (theme) => ({
     '& .MuiToolbar-root': {
       marginBottom: '-8px',
     },
+
+    '& .MuiTableCell-root': {
+      maxWidth: '250px',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
   },
   expand: {
     borderRadius: '0 !important',

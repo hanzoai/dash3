@@ -42,6 +42,10 @@ const UserForm = observer((props) => {
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  if (props.doCreate) {
+    usersStore.user = {}
+  }
+
   const ms = useMidstream({
     firstName: [isRequired],
     lastName: [isRequired],
@@ -65,9 +69,7 @@ const UserForm = observer((props) => {
     errors: usersStore.errors,
   })
 
-  if (props.doCreate) {
-    usersStore.user = undefined
-  }
+  const { user } = usersStore
 
   const { hooks, errors, run } = ms
 
@@ -77,8 +79,8 @@ const UserForm = observer((props) => {
 
     try {
       await run()
-      const user = await (doCreate ? usersStore.createUser() : usersStore.updateUser())
-      Router.push(`/dash/user?id=${user.id}`)
+      const u = await (doCreate ? usersStore.createUser() : usersStore.updateUser())
+      Router.push(`/dash/user?id=${u.id}`)
     } catch (e) {
       console.log('user update error', e)
       setError(e.message || e)
@@ -86,8 +88,6 @@ const UserForm = observer((props) => {
 
     setIsLoading(false)
   }
-
-  const { user } = usersStore
 
   const disabled = isLoading || usersStore.isLoading
 

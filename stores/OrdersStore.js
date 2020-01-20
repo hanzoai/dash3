@@ -41,10 +41,12 @@ export default class OrdersStore {
     this.orderId = id || this.orderId
 
     try {
-      const res = await this.api.client.order.get(this.orderId)
+      const ps = [this.api.client.order.get(this.orderId), this.api.client.order.payments(this.orderId)]
+
+      const [res, payments] = await Promise.all(ps)
 
       runInAction(() => {
-        this.order = Object.assign(this.order, res)
+        this.order = Object.assign(this.order, res, { paymentObjects: payments })
         // fix gender upper/lower case issues
         if (this.order.kyc && this.order.kyc.gender) {
           this.order.kyc.gender = this.order.kyc.gender.toLowerCase()

@@ -44,8 +44,9 @@ export default class ProductsStore {
       const res = await this.api.client.product.get(this.productId)
 
       const ps = [this.api.client.counter.search({
-        tag: `damon_sold_${res.id}_prod_all`,
+        tag: `product.${this.productId}.sold`,
         period: 'total',
+        geo: '',
       })]
 
       const [sold] = await Promise.all(ps)
@@ -180,8 +181,9 @@ export default class ProductsStore {
     const ps = []
     for (const product of this.products) {
       ps.push(this.api.client.counter.search({
-        tag: `damon_sold_${product.id}_prod_all`,
+        tag: `product.${product.id}.sold`,
         period: 'total',
+        geo: '',
       }))
     }
 
