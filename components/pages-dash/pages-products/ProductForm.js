@@ -3,8 +3,8 @@ import {
 } from '@hanzo/middleware'
 
 import {
-  MUIText,
   MUISwitch,
+  MUIText,
 } from '@hanzo/react'
 
 import {
@@ -47,7 +47,7 @@ const ProductForm = observer((props) => {
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  if (props.doCreate) {
+  if (props.doCreate && productsStore.product.id) {
     productsStore.product = {}
   }
 

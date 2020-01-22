@@ -2,7 +2,7 @@ import { Component } from 'react'
 
 import { inject, observer } from 'mobx-react'
 import { isLoggedIn } from '../../components/pages'
-import ProductsSearch from '../../components/pages-dash/pages-products/ProductsSearch'
+import { ProductsSearch } from '../../components/pages-dash'
 
 import {
   Grid,

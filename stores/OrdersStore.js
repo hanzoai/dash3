@@ -35,6 +35,32 @@ export default class OrdersStore {
     this.api = hanzoApi
   }
 
+  @action async refundOrder(id, amount) {
+    this.isLoading = true
+
+    this.orderId = id || this.orderId
+
+    try {
+      const res = await this.api.client.order.refund({
+        id: this.orderId,
+        amount,
+      })
+
+      runInAction(() => {
+        this.order = Object.assign(this.order, res)
+        this.isLoading = false
+      })
+
+      return this.order
+    } catch (e) {
+      runInAction(() => {
+        this.isLoading = false
+      })
+
+      throw e
+    }
+  }
+
   @action async getOrder(id) {
     this.isLoading = true
 
@@ -47,10 +73,6 @@ export default class OrdersStore {
 
       runInAction(() => {
         this.order = Object.assign(this.order, res, { paymentObjects: payments })
-        // fix gender upper/lower case issues
-        if (this.order.kyc && this.order.kyc.gender) {
-          this.order.kyc.gender = this.order.kyc.gender.toLowerCase()
-        }
         this.isLoading = false
       })
 

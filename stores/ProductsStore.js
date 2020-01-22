@@ -53,10 +53,6 @@ export default class ProductsStore {
 
       runInAction(() => {
         this.product = Object.assign(this.product, res, { sold: sold.count })
-        // fix gender upper/lower case issues
-        if (this.product.kyc && this.product.kyc.gender) {
-          this.product.kyc.gender = this.product.kyc.gender.toLowerCase()
-        }
         this.isLoading = false
       })
 

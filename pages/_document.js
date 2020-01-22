@@ -23,7 +23,7 @@ export default class MyDocument extends Document {
         dir='ltr'
       )
         Head
-          title ESX Admin
+          title Hanzo Admin
           meta(charSet='utf-8')
           meta(
             httpEquiv='x-ua-compatible'

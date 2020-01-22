@@ -3,7 +3,7 @@ import { Component } from 'react'
 import Router, { withRouter } from 'next/router'
 import { inject, observer } from 'mobx-react'
 import { isLoggedIn } from '../../components/pages'
-import OrderForm from '../../components/pages-dash/pages-orders/OrderForm'
+import { OrderForm } from '../../components/pages-dash/'
 
 import css from 'styled-jsx/css'
 

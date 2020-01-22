@@ -212,6 +212,12 @@ blueprints.order.payments = {
   expects: statusOk,
 }
 
+blueprints.order.refund = {
+  method: 'POST',
+  url: (x) => `/order/${x.id || x}/refund`,
+  expects: statusOk,
+}
+
 blueprints.organization = {
   get: {
     url: (x) => `/c/organization/${x.id || x}`,

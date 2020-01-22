@@ -22,6 +22,7 @@ import {
   Apps as AppsIcon,
   MonetizationOn as MonetizationOnIcon,
   Receipt as ReceiptIcon,
+  Poll as PollIcon,
 } from '@material-ui/icons'
 
 import Link from '../link'
@@ -51,9 +52,16 @@ class MyDrawer extends Component {
             ListItem
               ListItemIcon(className=classes.listIcon)
                 Link.columns(href='/dash' color='textPrimary' underline='none')
-                  GroupIcon
+                  PollIcon
               ListItemText
                 Link(href='/dash' color='textPrimary' underline='none')
+                  | Overview
+            ListItem
+              ListItemIcon(className=classes.listIcon)
+                Link.columns(href='/dash/users' color='textPrimary' underline='none')
+                  GroupIcon
+              ListItemText
+                Link(href='/dash/users' color='textPrimary' underline='none')
                   | Users
             ListItem
               ListItemIcon(className=classes.listIcon)

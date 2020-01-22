@@ -42,7 +42,7 @@ const UserForm = observer((props) => {
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  if (props.doCreate) {
+  if (props.doCreate && usersStore.user.id) {
     usersStore.user = {}
   }
 

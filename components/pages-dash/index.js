@@ -1,3 +1,16 @@
 export { default as searchStyle } from './searchStyle'
-export { default as UserForm } from './pages-users/UserForm'
-export { default as UsersSearch } from './pages-users/UsersSearch'
+export {
+  ProductForm,
+  ProductsSearch,
+} from './pages-products'
+export {
+  OrderForm,
+  OrdersSearch,
+} from './pages-orders'
+export {
+  UserForm,
+  UsersSearch,
+} from './pages-users'
+export {
+  Dashboard,
+} from './pages-index'

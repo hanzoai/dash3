@@ -21,10 +21,14 @@ export default (theme) => ({
       marginBottom: '-8px',
     },
 
-    '& .MuiTableCell-root': {
+    '& .MuiTableCell-root:not(.MuiTableCell-footer)': {
       maxWidth: '250px',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
+    },
+
+    '& .MuiTableCell-footer': {
+      overflow: 'hidden',
     },
   },
   expand: {

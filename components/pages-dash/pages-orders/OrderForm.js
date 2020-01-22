@@ -17,7 +17,13 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
+  InputAdornment,
   Typography,
 } from '@material-ui/core'
 
@@ -32,12 +38,19 @@ import Router from 'next/router'
 import React, { useState } from 'react'
 
 import {
+  ORDER_STATUS_OPTIONS,
+  PAYMENT_STATUS_OPTIONS,
+} from '../../../src/consts'
+import {
+  renderJSONCurrencyFromUI,
+  renderNumericCurrencyFromJSON,
   renderUICurrencyFromJSON,
 } from '../../../src/currency'
-import searchStyle from '../searchStyle'
 import { useMidstream } from '../../../src/hooks'
 import { useStore } from '../../../stores'
+import { CreateCurrencyFormat } from '../../controls'
 import { MUITable } from '../../tables'
+import searchStyle from '../searchStyle'
 
 const useStyles = makeStyles((theme) => (
   Object.assign(searchStyle(theme), {
@@ -53,10 +66,10 @@ const columns = [
     field: 'id',
     render: (row) => {
       if (row.type === 'stripe') {
-        return row.account.chargeId
+        return row.account.chargeId || 'N/A'
       }
 
-      return 'n/a'
+      return 'N/A'
     },
   },
   {
@@ -73,7 +86,7 @@ const columns = [
   },
   {
     title: 'Country',
-    render: (row) => row.client.country
+    render: (row) => row.client.country,
   },
   {
     title: 'Status',
@@ -81,15 +94,15 @@ const columns = [
   },
   {
     title: 'Fee',
-    render: (row) => renderUICurrencyFromJSON(row.currency, row.fee),
+    render: (row) => renderNumericCurrencyFromJSON(row.currency, row.fee),
   },
   {
     title: 'Amount',
-    render: (row) => renderUICurrencyFromJSON(row.currency, row.amount),
+    render: (row) => renderNumericCurrencyFromJSON(row.currency, row.amount),
   },
   {
     title: 'Refunded',
-    render: (row) => renderUICurrencyFromJSON(row.currency, row.amountRefunded),
+    render: (row) => renderNumericCurrencyFromJSON(row.currency, row.amountRefunded),
   },
 ]
 
@@ -106,11 +119,12 @@ const OrderForm = observer((props) => {
   const [error, setError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  if (props.doCreate) {
+  if (props.doCreate && ordersStore.order.id) {
     ordersStore.order = {}
   }
 
   const { order, errors } = ordersStore
+  const { currency } = order
 
   const ms = useMidstream({
     email: [isRequired],
@@ -142,9 +156,6 @@ const OrderForm = observer((props) => {
   const {
     hooks,
     run,
-    setEmail,
-    setStatus,
-    setPaymentStatus,
   } = ms
 
   const onRowClick = (event, rowData) => {
@@ -175,254 +186,398 @@ const OrderForm = observer((props) => {
 
   const disabled = isLoading || ordersStore.isLoading
 
+  const [refundOpen, setRefundOpen] = React.useState(false)
+  const [refund, setRefund] = React.useState(0)
+  const [refundError, setRefundError] = React.useState(false)
+  const [refundSuccess, setRefundSuccess] = React.useState(false)
+
+  const openRefund = () => {
+    setRefundOpen(true)
+    setRefund(0)
+    setRefundError(false)
+    setRefundSuccess(false)
+  }
+
+  const closeRefund = () => {
+    setRefundOpen(false)
+  }
+
+  const executeRefund = async () => {
+    setRefundError(false)
+    setIsLoading(true)
+
+    try {
+      await ordersStore.refundOrder(order.id, refund)
+      setRefundSuccess(true)
+    } catch (e) {
+      setRefundError(e)
+    }
+
+    setIsLoading(false)
+  }
+
   return (
-    <Grid container justify='center' alignItems='flex-start' spacing={2}>
-      <Grid item xs={12}>
-        { !doCreate
-          && <Card>
-            <CardContent>
-              <Typography variant='h6'>
-                Statistics
-              </Typography>
-              <Grid container>
-                <Grid item xs={4}>
-                  <Typography variant='body1'>
-                    ID
-                  </Typography>
-                  <Typography variant='body2'>
-                    { order.id }
-                  </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant='body1'>
-                    Created At
-                  </Typography>
-                  <Typography variant='body2'>
-                    { renderUIDate(order.createdAt) }
-                  </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant='body1'>
-                    Updated At
-                  </Typography>
-                  <Typography variant='body2'>
-                    { renderUIDate(order.updatedAt) }
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        }
-      </Grid>
-      <Grid item xs={6}>
-        <Card>
-          <CardContent>
-            <Grid container justify='center' alignItems='flex-start' spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant='h6'>
-                  Order Information
-                </Typography>
-                { error
-                  && <div className='error'>
-                    { error }
-                  </div>
-                }
-              </Grid>
-              <Grid item xs={6}>
-                <MUIText
-                  label='Email'
-                  variant='outlined'
-                  disabled={disabled}
-                  value={order.email}
-                  error={errors.email}
-                  setValue={setEmail}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <MUIText
-                  label='Name'
-                  variant='outlined'
-                  disabled={disabled}
-                  value={getPath(order, 'shippingAddress.name')}
-                  error={errors['shippingAddress.name']}
-                  setValue={hooks['shippingAddress.name'][1]}
-                />
-              </Grid>
-              <Grid item xs={9}>
-                <MUIText
-                  label='Address'
-                  variant='outlined'
-                  disabled={disabled}
-                  value={getPath(order, 'shippingAddress.line1')}
-                  error={errors['shippingAddress.line1']}
-                  setValue={hooks['shippingAddress.line1'][1]}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <MUIText
-                  label='Suite'
-                  variant='outlined'
-                  disabled={disabled}
-                  value={getPath(order, 'shippingAddress.line2')}
-                  error={errors['shippingAddress.line1']}
-                  setValue={hooks['shippingAddress.line1'][1]}
-                />
-              </Grid>
-              <Grid item xs={8}>
-                <MUIText
-                  label='City'
-                  variant='outlined'
-                  disabled={disabled}
-                  value={getPath(order, 'shippingAddress.city')}
-                  error={errors['shippingAddress.city']}
-                  setValue={hooks['shippingAddress.city'][1]}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <MUIText
-                  label='ZIP/Postal Code'
-                  variant='outlined'
-                  disabled={disabled}
-                  value={getPath(order, 'shippingAddress.postalCode')}
-                  error={errors['shippingAddress.postalCode']}
-                  setValue={hooks['shippingAddress.postalCode'][1]}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <MUIText
-                  label='Region/State'
-                  select
-                  options={settingsStore.stateOptions[getPath(order, 'shippingAddress.country')]}
-                  variant='outlined'
-                  disabled={disabled}
-                  placeholder='Select a State'
-                  value={getPath(order, 'shippingAddress.state')}
-                  error={errors['shippingAddress.state']}
-                  setValue={hooks['shippingAddress.state'][1]}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <MUIText
-                  label='Country'
-                  select
-                  options={settingsStore.countryOptions}
-                  variant='outlined'
-                  disabled={disabled}
-                  placeholder='Select a Country'
-                  value={getPath(order, 'shippingAddress.country')}
-                  error={errors['shippingAddress.country']}
-                  setValue={hooks['shippingAddress.country'][1]}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  size='large'
-                  variant='contained'
-                  color='primary'
-                  type='submit'
-                  disabled={disabled}
-                  onClick={submit}
-                >
-                  { doCreate ? 'Create' : 'Save' }
-                </Button>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
-      <Grid item xs={6}>
-        { !doCreate
-          && <Card>
+    <>
+      <Grid container justify='center' alignItems='flex-start' spacing={2}>
+        <Grid item xs={12}>
+          { !doCreate
+            && <Card>
               <CardContent>
                 <Typography variant='h6'>
-                  Receipt
+                  Statistics
                 </Typography>
                 <Grid container>
-                  <Grid item xs={12}>
+                  <Grid item xs={4}>
                     <Typography variant='body1'>
-                      Number
+                      ID
                     </Typography>
                     <Typography variant='body2'>
-                      { order.number }
+                      { order.id }
                     </Typography>
-                    <br />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={4}>
                     <Typography variant='body1'>
-                      Items
+                      Created At
+                    </Typography>
+                    <Typography variant='body2'>
+                      { renderUIDate(order.createdAt) }
                     </Typography>
                   </Grid>
-                  { order.items && order.items.map((item) => (
-                    <>
-                      <Grid item xs={8}>
-                        <Typography variant='body2'>
-                          {item.quantity} x { item.productName }
-                        </Typography>
-                        <br />
-                      </Grid>
-                      <Grid item xs={4} className={classes.right}>
-                        <Typography variant='body2'>
-                          { renderUICurrencyFromJSON(item.currency, item.price) }
-                        </Typography>
-                        <br />
-                      </Grid>
-                    </>
-                  ))}
-                  <Grid item xs={6}>
-                    <Typography variant='body2'>
-                      <strong>Subtotal</strong>
+                  <Grid item xs={4}>
+                    <Typography variant='body1'>
+                      Updated At
                     </Typography>
-                  </Grid>
-                  <Grid item xs={6} className={classes.right}>
                     <Typography variant='body2'>
-                      { renderUICurrencyFromJSON(order.currency, order.subtotal) }
+                      { renderUIDate(order.updatedAt) }
                     </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant='body2'>
-                      <strong>Discount</strong>
-                    </Typography>
-                    <br />
-                  </Grid>
-                  <Grid item xs={6} className={classes.right}>
-                    <Typography variant='body2'>
-                      { renderUICurrencyFromJSON(order.currency, order.discount) }
-                    </Typography>
-                    <br />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant='body2'>
-                      <strong>Total</strong>
-                    </Typography>
-                    <br />
-                  </Grid>
-                  <Grid item xs={6} className={classes.right}>
-                    <Typography variant='body2'>
-                      { renderUICurrencyFromJSON(order.currency, order.total) }
-                    </Typography>
-                    <br />
                   </Grid>
                 </Grid>
               </CardContent>
             </Card>
-        }
+          }
+        </Grid>
+        <Grid item xs={6}>
+          <Card>
+            <CardContent>
+              <Grid container justify='center' alignItems='flex-start' spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant='h6'>
+                    Order Information
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <MUIText
+                    label='Email'
+                    variant='outlined'
+                    disabled={disabled}
+                    value={order.email}
+                    error={errors.email}
+                    setValue={hooks.email[1]}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <MUIText
+                    label='Name'
+                    variant='outlined'
+                    disabled={disabled}
+                    value={getPath(order, 'shippingAddress.name')}
+                    error={errors['shippingAddress.name']}
+                    setValue={hooks['shippingAddress.name'][1]}
+                  />
+                </Grid>
+                <Grid item xs={9}>
+                  <MUIText
+                    label='Address'
+                    variant='outlined'
+                    disabled={disabled}
+                    value={getPath(order, 'shippingAddress.line1')}
+                    error={errors['shippingAddress.line1']}
+                    setValue={hooks['shippingAddress.line1'][1]}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <MUIText
+                    label='Suite'
+                    variant='outlined'
+                    disabled={disabled}
+                    value={getPath(order, 'shippingAddress.line2')}
+                    error={errors['shippingAddress.line1']}
+                    setValue={hooks['shippingAddress.line1'][1]}
+                  />
+                </Grid>
+                <Grid item xs={8}>
+                  <MUIText
+                    label='City'
+                    variant='outlined'
+                    disabled={disabled}
+                    value={getPath(order, 'shippingAddress.city')}
+                    error={errors['shippingAddress.city']}
+                    setValue={hooks['shippingAddress.city'][1]}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <MUIText
+                    label='ZIP/Postal Code'
+                    variant='outlined'
+                    disabled={disabled}
+                    value={getPath(order, 'shippingAddress.postalCode')}
+                    error={errors['shippingAddress.postalCode']}
+                    setValue={hooks['shippingAddress.postalCode'][1]}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <MUIText
+                    label='Region/State'
+                    select
+                    options={settingsStore.stateOptions[getPath(order, 'shippingAddress.country')]}
+                    variant='outlined'
+                    disabled={disabled}
+                    placeholder='Select a State'
+                    value={getPath(order, 'shippingAddress.state')}
+                    error={errors['shippingAddress.state']}
+                    setValue={hooks['shippingAddress.state'][1]}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <MUIText
+                    label='Country'
+                    select
+                    options={settingsStore.countryOptions}
+                    variant='outlined'
+                    disabled={disabled}
+                    placeholder='Select a Country'
+                    value={getPath(order, 'shippingAddress.country')}
+                    error={errors['shippingAddress.country']}
+                    setValue={hooks['shippingAddress.country'][1]}
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+          <br />
+          <Card>
+            <CardContent>
+              <Grid container justify='center' alignItems='flex-start' spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant='h6'>
+                    Order Status
+                  </Typography>
+                  { error
+                    && <div className='error'>
+                      { error }
+                    </div>
+                  }
+                </Grid>
+                <Grid item xs={6}>
+                  <MUIText
+                    label='Order Status'
+                    select
+                    options={ORDER_STATUS_OPTIONS}
+                    variant='outlined'
+                    disabled={disabled}
+                    placeholder='Select an Order Status'
+                    value={order.status}
+                    error={errors.status}
+                    setValue={hooks.status[1]}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <MUIText
+                    label='Payment Status'
+                    select
+                    options={PAYMENT_STATUS_OPTIONS}
+                    variant='outlined'
+                    disabled={disabled}
+                    placeholder='Select an Payment Status'
+                    value={order.paymentStatus}
+                    error={errors.paymentStatus}
+                    setValue={hooks.paymentStatus[1]}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    size='large'
+                    variant='contained'
+                    color='primary'
+                    type='submit'
+                    disabled={disabled}
+                    onClick={submit}
+                    style={{
+                      marginRight: 8,
+                    }}
+                  >
+                    { doCreate ? 'Create' : 'Save' }
+                  </Button>
+                  { !doCreate
+                    && <Button
+                        size='large'
+                        variant='contained'
+                        color='secondary'
+                        type='submit'
+                        disabled={disabled}
+                        onClick={openRefund}
+                      >
+                        Refund
+                      </Button>
+                  }
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={6}>
+          { !doCreate
+            && <Card>
+                <CardContent>
+                  <Typography variant='h6'>
+                    Receipt
+                  </Typography>
+                  <br />
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <Typography variant='body2'>
+                        <strong>Number</strong>
+                      </Typography>
+                      <Typography variant='body2'>
+                        { order.number }
+                      </Typography>
+                      <br />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant='body2'>
+                        <strong>Items</strong>
+                      </Typography>
+                    </Grid>
+                    { order.items && order.items.map((item) => (
+                      <>
+                        <Grid item xs={8}>
+                          <Typography variant='body2'>
+                            {item.quantity} x { item.productName }
+                          </Typography>
+                          <br />
+                        </Grid>
+                        <Grid item xs={4} className={classes.right}>
+                          <Typography variant='body2'>
+                            { renderUICurrencyFromJSON(item.currency, item.price) }
+                          </Typography>
+                          <br />
+                        </Grid>
+                      </>
+                    ))}
+                    <Grid item xs={6}>
+                      <Typography variant='body2'>
+                        <strong>Subtotal</strong>
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} className={classes.right}>
+                      <Typography variant='body2'>
+                        { renderUICurrencyFromJSON(order.currency, order.subtotal) }
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant='body2'>
+                        <strong>Discount</strong>
+                      </Typography>
+                      <br />
+                    </Grid>
+                    <Grid item xs={6} className={classes.right}>
+                      <Typography variant='body2'>
+                        { renderUICurrencyFromJSON(order.currency, order.discount) }
+                      </Typography>
+                      <br />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant='body2'>
+                        <strong>Total</strong>
+                      </Typography>
+                      <br />
+                    </Grid>
+                    <Grid item xs={6} className={classes.right}>
+                      <Typography variant='body2'>
+                        { renderUICurrencyFromJSON(order.currency, order.total) }
+                      </Typography>
+                      <br />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+          }
+        </Grid>
+        <Grid item xs={12}>
+          { !doCreate && order.paymentObjects
+            && <div className={classes.table}>
+                <MUITable
+                  columns={columns}
+                  options={opts}
+                  isLoading={ordersStore.isLoading}
+                  initialPage={0}
+                  data={order.paymentObjects}
+                  title='Payments'
+                  onRowClick={onRowClick}
+                />
+              </div>
+          }
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        { !doCreate && order.paymentObjects
-          && <div className={classes.table}>
-              <MUITable
-                columns={columns}
-                options={opts}
-                isLoading={ordersStore.isLoading}
-                initialPage={0}
-                data={order.paymentObjects}
-                title='Payments'
-                onRowClick={onRowClick}
+
+      <Dialog open={refundOpen} onClose={closeRefund} aria-labelledby='form-dialog-title'>
+        <DialogTitle id='form-dialog-title'>Subscribe</DialogTitle>
+        <DialogContent>
+          { refundSuccess
+            ? <>
+              <DialogContentText>
+                This refund was successfully processed.
+              </DialogContentText>
+            </>
+            : <>
+              <DialogContentText>
+                Enter an amount to refund.
+              </DialogContentText>
+              <MUIText
+                label='Refund'
+                variant='outlined'
+                disabled={disabled}
+                InputProps={{
+                  inputComponent: CreateCurrencyFormat(currency),
+                  endAdornment: <InputAdornment position='end'>{ currency ? currency.toUpperCase() : 'USD'}</InputAdornment>,
+                }}
+                defaultValue={renderNumericCurrencyFromJSON(currency, refund || 0)}
+                setValue={(v) => {
+                  const value = renderJSONCurrencyFromUI(currency, v)
+                  setRefund(value)
+                }}
+                error={errors.listPrice || refundError}
               />
-            </div>
-        }
-      </Grid>
-    </Grid>
+            </>
+          }
+        </DialogContent>
+        <DialogActions>
+          { refundSuccess
+            ? <>
+              <Button onClick={closeRefund} variant='outlined' color='primary'>
+                Confirm
+              </Button>
+            </>
+            : <>
+              <Button
+                onClick={closeRefund}
+                color='primary'
+                disabled={disabled}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={executeRefund}
+                color='secondary'
+                disabled={disabled}
+              >
+                Confirm Refund
+              </Button>
+            </>
+          }
+        </DialogActions>
+      </Dialog>
+    </>
   )
 })
 

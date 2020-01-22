@@ -26,13 +26,10 @@ import Router from 'next/router'
 import React, { useRef, useState } from 'react'
 
 import {
-  renderJSONCurrencyFromUI,
-  renderNumericCurrencyFromJSON,
   renderUICurrencyFromJSON,
 } from '../../../src/currency'
 import { useMidstream } from '../../../src/hooks'
 import { useStore } from '../../../stores'
-import { CreateCurrencyFormat } from '../../controls'
 
 import { MUITable } from '../../tables'
 import searchStyle from '../searchStyle'
@@ -159,9 +156,9 @@ const OrdersTable = observer(() => {
     setIsLoading(false)
   }
 
-  const create = () => {
-    Router.push('/dash/order')
-  }
+  // const create = () => {
+  //   Router.push('/dash/order')
+  // }
 
   const { hooks, dst } = ms
   const disabled = isLoading || ordersStore.isLoading
@@ -194,7 +191,6 @@ const OrdersTable = observer(() => {
       ev.preventDefault()
     }
   }
-
 
   return (
     <div>

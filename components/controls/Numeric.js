@@ -1,8 +1,8 @@
 import NF from 'react-number-format'
 import { signs } from '../../src/currency'
 
-export const CreateCurrencyFormat = (currency) => {
-  return (props) => {
+export const CreateCurrencyFormat = (currency) => (
+  (props) => {
     const {
       inputRef,
       onBlur,
@@ -22,23 +22,23 @@ export const CreateCurrencyFormat = (currency) => {
       />
     )
   }
-}
+)
 
 export const NumberFormat = (props) => {
-  const { inputRef, onBlur, ...other } = props
+  const {
+    inputRef,
+    onBlur,
+    onChange,
+    onFocus,
+    value,
+    ...other
+  } = props
 
   return (
     <NF
       {...other}
       getInputRef={inputRef}
-      onValueChange={(values) => {
-        const n = parseFloat(values.value)
-        onBlur({
-          target: {
-            value: Number.isNaN(n) ? 0 : n,
-          },
-        })
-      }}
+      onBlur={onBlur}
       isNumericString
     />
   )

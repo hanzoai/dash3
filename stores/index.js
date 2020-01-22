@@ -9,6 +9,7 @@ import { HANZO_ENDPOINT } from '../src/settings'
 
 // Stores
 import CredentialStore from './CredentialStore'
+import DashboardStore from './DashboardStore'
 import OrdersStore from './OrdersStore'
 import ProductsStore from './ProductsStore'
 import SettingsStore from './SettingsStore'
@@ -21,6 +22,7 @@ let store = null
 
 const defaultData = {
   credentialData: {},
+  dashboardData: {},
   settingsData: {},
   userData: {},
   productData: {},
@@ -33,6 +35,7 @@ export const initStore = (data = defaultData) => {
     // Server stuff
     store = {
       credentialStore: new CredentialStore(data.credentialData, api),
+      dashboardStore: new DashboardStore(data.dashboardData, api),
       settingsStore: new SettingsStore(data.settingsData, api),
       usersStore: new UsersStore(data.userData, api),
       productsStore: new ProductsStore(data.productData, api),
@@ -42,6 +45,7 @@ export const initStore = (data = defaultData) => {
     // Client stuff
     store = {
       credentialStore: new CredentialStore(data.credentialData, api),
+      dashboardStore: new DashboardStore(data.dashboardData, api),
       settingsStore: new SettingsStore(data.settingsData, api),
       usersStore: new UsersStore(data.userData, api),
       productsStore: new ProductsStore(data.productData, api),
