@@ -94,15 +94,15 @@ const columns = [
   },
   {
     title: 'Fee',
-    render: (row) => renderNumericCurrencyFromJSON(row.currency, row.fee),
+    render: (row) => renderUICurrencyFromJSON(row.currency, row.fee),
   },
   {
     title: 'Amount',
-    render: (row) => renderNumericCurrencyFromJSON(row.currency, row.amount),
+    render: (row) => renderUICurrencyFromJSON(row.currency, row.amount),
   },
   {
     title: 'Refunded',
-    render: (row) => renderNumericCurrencyFromJSON(row.currency, row.amountRefunded),
+    render: (row) => renderUICurrencyFromJSON(row.currency, row.amountRefunded),
   },
 ]
 

@@ -15,7 +15,7 @@ class Order extends Component {
     super(props)
 
     this.state = {
-      create: !props.router.query.id,
+      create: false,
     }
   }
 
