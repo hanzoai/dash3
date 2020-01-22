@@ -9,6 +9,10 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: 200,
     paddingTop: 80,
     width: '100vw',
+
+    '& .MuiExpansionPanelDetails-root': {
+      flexDirection: 'column',
+    },
   },
 }))
 

@@ -271,16 +271,6 @@ const UsersTable = observer(() => {
                   setValue={hooks.LastNamePartials[1]}
                 />
               </Grid>
-              {
-              // Grid(item xs=2)
-              //   MUIKeyboardDatePicker(
-              //     label='Created on'
-              //     disabled=disabled
-              //     shrink=true
-              //     value=dst.CreatedAt
-              //     setValue=hooks.CreatedAt[1]
-              //   )
-              }
             </Grid>
             <br />
             <Grid container spacing={2} alignItems='center'>
