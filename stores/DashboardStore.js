@@ -41,7 +41,7 @@ export default class DashboardStore {
 
   @observable totalUsers = 0
 
-  @observable productsList = []
+  @observable products = []
 
   @observable errors = {}
 
@@ -261,14 +261,14 @@ export default class DashboardStore {
     try {
       const [weeklyUsers, lastWeeklyUsers] = await Promise.all([
         this.api.client.counter.search({
-          tag: 'order.revenue',
+          tag: 'user.count',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(now),
           after: renderJSONDate(now.subtract(1, 'week')),
         }),
         this.api.client.counter.search({
-          tag: 'order.revenue',
+          tag: 'user.count',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(lastWeek),
@@ -368,5 +368,77 @@ export default class DashboardStore {
     }
 
     return this.totalUsers
+  }
+
+  @action async getProducts() {
+    this.isLoading = true
+
+    try {
+      const opts = {
+        page: 1,
+        display: 100,
+      }
+
+      const res = await this.api.client.product.list(opts)
+
+      runInAction(() => {
+        this.products = res.models
+        this.isLoading = false
+      })
+    } catch (e) {
+      runInAction(() => {
+        this.isLoading = false
+      })
+
+      console.log('list error', e)
+
+      throw e
+    }
+
+    const ps = []
+    for (const product of this.products) {
+      ps.push(this.api.client.counter.search({
+        tag: `product.${product.id}.sold`,
+        period: 'total',
+        geo: '',
+      }))
+    }
+
+    const ps2 = []
+    for (const product of this.products) {
+      ps2.push(this.api.client.counter.search({
+        tag: `product.${product.id}.revenue`,
+        period: 'total',
+        geo: '',
+      }))
+    }
+
+    try {
+      const res = await Promise.all(ps)
+      for (const k in this.products) {
+        this.products[k].sold = res[k].count
+      }
+    } catch (e) {
+      console.log('counter error', e)
+      throw e
+    }
+
+    try {
+      const res = await Promise.all(ps2)
+      for (const k in this.products) {
+        this.products[k].revenue = res[k].count
+      }
+    } catch (e) {
+      console.log('counter error', e)
+      throw e
+    }
+
+    runInAction(() => {
+      this.products = this.products.slice().sort((a, b) => b.sold - a.sold)
+    })
+
+    console.log('p', this.products.slice())
+
+    return this.products
   }
 }

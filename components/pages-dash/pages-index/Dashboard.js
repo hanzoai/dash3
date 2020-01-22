@@ -9,6 +9,8 @@ import React, { useEffect } from 'react'
 import { useStore } from '../../../stores'
 
 import {
+  DailyRevenue,
+  ProductPerformance,
   SalesChart,
   TotalRevenue,
   TotalSales,
@@ -16,7 +18,7 @@ import {
 } from './charts'
 
 import {
-  PageViews,
+  PageViewsDate,
 } from './ga'
 
 const Dashboard = observer(() => {
@@ -36,6 +38,8 @@ const Dashboard = observer(() => {
     dashboardStore.getTotalSales()
     dashboardStore.getTotalRevenue()
     dashboardStore.getTotalUsers()
+
+    dashboardStore.getProducts()
   }, [])
 
   return (
@@ -74,13 +78,13 @@ const Dashboard = observer(() => {
         xl={3}
         xs={12}
       >
-        <TotalSales />
+        <DailyRevenue />
       </Grid>
       <Grid item xs={12}>
         <SalesChart />
       </Grid>
-      <Grid item sm={6} xs={12}>
-        <PageViews />
+      <Grid item xs={12}>
+        <ProductPerformance />
       </Grid>
     </Grid>
   )
