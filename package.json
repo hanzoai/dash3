@@ -49,6 +49,7 @@
     "nextjs": "0.0.3",
     "query-string": "6.10.1",
     "react": "16.12.0",
+    "react-analytics-widget": "1.2.0",
     "react-chartjs-2": "2.8.0",
     "react-dom": "16.12.0",
     "react-filepond": "7.0.1",

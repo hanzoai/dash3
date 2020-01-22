@@ -15,6 +15,10 @@ import {
   TotalUsers,
 } from './charts'
 
+import {
+  PageViews,
+} from './ga'
+
 const Dashboard = observer(() => {
   const {
     dashboardStore,
@@ -74,6 +78,9 @@ const Dashboard = observer(() => {
       </Grid>
       <Grid item xs={12}>
         <SalesChart />
+      </Grid>
+      <Grid item sm={6} xs={12}>
+        <PageViews />
       </Grid>
     </Grid>
   )

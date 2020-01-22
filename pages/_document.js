@@ -1,12 +1,12 @@
 import React from 'react'
-import Document, { Html, Head, Main, NextScript } from 'next/document'
-
-if (process) {
-  console.log(process.env.NODE_ENV)
-}
+import Document, {
+  Html,
+  Head,
+  Main,
+  NextScript,
+} from 'next/document'
 
 export default class MyDocument extends Document {
-
   // getChildContext() {
   //   return {
   //     _documentProps: this.props,
@@ -17,38 +17,60 @@ export default class MyDocument extends Document {
   render() {
     const { pageContext } = this.props
 
-    return pug`
-      Html(
+    return (
+      <Html
         lang='en'
         dir='ltr'
-      )
-        Head
-          title Hanzo Admin
-          meta(charSet='utf-8')
-          meta(
+      >
+        <Head>
+          <title>Hanzo Admin</title>
+          <meta charSet='utf-8'/>
+          <meta
             httpEquiv='x-ua-compatible'
             content='ie=edge'
-          )
-          meta(
+          />
+          <meta
             name='viewport'
             content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'
-          )
-          meta(
+          />
+          <meta
             name='msapplication-tap-highlight'
             content='no'
-          )
-          link(
+          />
+          <link
             rel='manifest'
             href='/static/manifest.json'
-          )
-          link(
+          />
+          <link
             rel='icon'
             type='image/png'
             href='/static/favicon.ico'
-          )
-        body
-          Main
-          NextScript
-    `
+          />
+          <script dangerouslySetInnerHTML={
+            {
+              __html: `;(function(w, d, s, g, js, fjs) {
+              g = w.gapi || (w.gapi = {})
+              g.analytics = {
+                q: [],
+                ready: function(cb) {
+                  this.q.push(cb)
+                }
+              }
+              js = d.createElement(s)
+              fjs = d.getElementsByTagName(s)[0]
+              js.src = "https://apis.google.com/js/platform.js"
+              fjs.parentNode.insertBefore(js, fjs)
+              js.onload = function() {
+                g.load("analytics")
+              }
+            })(window, document, "script")`,
+            }} />
+        </Head>
+        <body>
+          <Main/>
+          <NextScript/>
+        </body>
+      </Html>
+    )
   }
 }
