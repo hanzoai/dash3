@@ -123,7 +123,7 @@ const DailyRevenue = observer((props) => {
               >
                 {
                   weeklyRevenuePoints[5]
-                    ? (100 - (weeklyRevenuePoints[6] / weeklyRevenuePoints[5]) * 100).toFixed(2)
+                    ? ((weeklyRevenuePoints[6] / weeklyRevenuePoints[5]) * 100).toFixed(2)
                     : 100
                 }%
               </Typography>

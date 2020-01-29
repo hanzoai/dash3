@@ -117,7 +117,7 @@ const TotalUsers = observer((props) => {
               >
                 {
                   lastWeeklyUsers
-                    ? (100 - (weeklyUsers / lastWeeklyUsers) * 100).toFixed(2)
+                    ? ((weeklyUsers / lastWeeklyUsers) * 100).toFixed(2)
                     : 100
                 }%
               </Typography>
