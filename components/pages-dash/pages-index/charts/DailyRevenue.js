@@ -142,7 +142,7 @@ const DailyRevenue = observer((props) => {
             className={classes.caption}
             variant='caption'
           >
-            Since last week
+            Since yesterday
           </Typography>
         </div>
       </CardContent>
