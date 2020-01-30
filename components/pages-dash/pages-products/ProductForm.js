@@ -71,6 +71,7 @@ const ProductForm = observer((props) => {
     errors,
     run,
     setPrice,
+    setListPrice,
   } = ms
 
   const submit = async () => {
@@ -222,7 +223,7 @@ const ProductForm = observer((props) => {
                   defaultValue={renderNumericCurrencyFromJSON(currency, dst.listPrice) || 0}
                   setValue={(v) => {
                     const value = renderJSONCurrencyFromUI(currency, v)
-                    setPrice(value)
+                    setListPrice(value)
                   }}
                   error={errors.listPrice}
                 />

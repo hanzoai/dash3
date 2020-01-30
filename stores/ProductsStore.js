@@ -73,7 +73,7 @@ export default class ProductsStore {
       const res = await this.api.client.product.update(this.product)
 
       runInAction(() => {
-        this.product = res
+        this.product = Object.assign(this.product, res)
         this.isLoading = false
       })
 
@@ -94,7 +94,7 @@ export default class ProductsStore {
       const res = await this.api.client.product.create(this.product)
 
       runInAction(() => {
-        this.product = res
+        this.product = Object.assign(this.product, res)
         this.isLoading = false
       })
 

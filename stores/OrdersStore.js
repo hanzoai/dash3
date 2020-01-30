@@ -93,7 +93,7 @@ export default class OrdersStore {
       const res = await this.api.client.order.update(this.order)
 
       runInAction(() => {
-        this.order = res
+        this.order = Object.assign(this.order, res)
         this.isLoading = false
       })
 
