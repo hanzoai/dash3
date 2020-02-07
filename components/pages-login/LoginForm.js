@@ -1,129 +1,106 @@
-import { Component } from 'react'
-import { inject, observer } from 'mobx-react'
-import midstream from 'midstream'
-
-import {
-  MUIText,
-  MUICheckbox,
-} from '@hanzo/react'
-
 import {
   Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  TextField,
 } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
+import { useState } from 'react'
 
-import classnames from 'classnames'
+const styles = makeStyles(() => ({
+  centerCheckbox: {
+    justifyContent: 'center',
+  },
+  itemPadding: {
+    marginBottom: '1em',
+  },
+}))
 
-import {
-  isRequired,
-  isEmail,
-  isPassword,
-} from '@hanzo/middleware'
+export default (props) => {
+  const classes = styles()
 
-@inject("store")
-@observer
-class LoginForm extends Component {
-  constructor(props) {
-    super(props)
+  const { login } = props
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(false)
+  const [error, setError] = useState({
+    email: '',
+    password: '',
+  })
+  const [isLoading, setIsLoading] = useState(false)
 
-    let credentialStore = props.store.credentialStore
-
-    this.ms = midstream({
-      email:    [isRequired, isEmail],
-      password: [isRequired, isPassword],
-      remember: []
-    }, {
-      dst:    credentialStore,
-      errors: credentialStore.errors,
-    })
-
-    this.state = {
-      error: false,
-      isLoading: false
-    }
+  // TODO Validate
+  const handleError = (field, msg) => {
+    setError({ ...error, [field]: msg })
   }
 
-  async submit() {
-    this.setState({
-      error: false,
-      isLoading: true,
-    })
+  const handleEmail = (evt) => {
+    handleError('email', '')
+    setEmail(evt.target.value)
+  }
 
+  const handlePassword = (evt) => {
+    handleError('password', '')
+    setPassword(evt.target.value)
+  }
+
+  const handleRemember = (evt) => {
+    setRemember(evt.target.checked)
+  }
+
+  const handleLogin = async () => {
     try {
-      await this.ms.source.runAll()
-      await this.ms.dst.login()
-
-      this.props.onLogin()
-    } catch (e) {
-      this.setState({
-        error: e.message || e,
-      })
+      setIsLoading(true)
+      login()
+    } catch (ex) {
+      console.error('Error', ex)
+      setIsLoading(false)
+      handleError(ex.field, ex.msg)
     }
-
-    this.setState({
-        isLoading: false,
-    })
   }
 
-  render() {
-    const { hooks, dst, errors } = this.ms
-    const { error, isLoading } = this.state
-    const disabled = isLoading || dst.isLoading
+  const disabled = isLoading || email === '' || password === '' || error.email !== '' || error.password !== ''
 
-    const [
-      getEmail,
-      setEmail
-    ] = hooks.email
-
-    const [
-      getPassword,
-      setPassword
-    ] = hooks.password
-
-    const [
-      getRemember,
-      setRemember
-    ] = hooks.remember
-
-    return pug`
-      .login-form.form
-        .error
-          =error
-        MUIText(
-          label='Email'
-          variant='outlined'
-          disabled=disabled
-          value=dst.email
-          error=errors.email
-          setValue=setEmail
-        )
-        br
-        MUIText(
-          label='Password'
-          variant='outlined'
-          type='password'
-          disabled=disabled
-          value=dst.password
-          error=errors.password
-          setValue=setPassword
-        )
-        MUICheckbox(
-          label='Remember Me'
-          disabled=disabled
-          value=dst.remember
-          error=errors.remember
-          setValue=setRemember
-        )
-        Button(
-          size='large'
-          variant='contained'
-          color='primary'
-          type='submit'
-          disabled=disabled
-          onClick=() => this.submit()
-        )
-          | LOGIN
-    `
-  }
+  return (
+    <FormGroup autoComplete='off'>
+      <TextField
+        id='emai'
+        variant='outlined'
+        label='Email'
+        type='email'
+        value={email}
+        required
+        onChange={handleEmail}
+        error={error.email !== ''}
+        className={classes.itemPadding}
+      />
+      <TextField
+        id='password'
+        variant='outlined'
+        label='Password'
+        type='password'
+        required
+        value={password}
+        onChange={handlePassword}
+        error={error.password !== ''}
+        className={classes.itemPadding}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox checked={remember} onChange={handleRemember} value='remember' />
+        }
+        label='Remember Me'
+        className={classes.centerCheckbox}
+      />
+      <Button
+        size='large'
+        variant='contained'
+        color='primary'
+        type='submit'
+        disabled={disabled}
+        onClick={handleLogin}
+      > LOGIN </Button>
+    </FormGroup>
+  )
 }
-
-export default LoginForm

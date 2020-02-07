@@ -1,74 +1,53 @@
-import React from 'react'
-
-import AppBar from '@material-ui/core/AppBar'
+import { makeStyles } from '@material-ui/core/styles'
 import Toolbar from '@material-ui/core/Toolbar'
+import ArrowDownward from '@material-ui/icons/ArrowDownward'
+import ArrowUpward from '@material-ui/icons/ArrowUpward'
+import Send from '@material-ui/icons/Send'
 import Router from 'next/router'
+
 import Link from '../link'
 
-import { withStyles } from '@material-ui/core/styles'
-import Send from '@material-ui/icons/Send'
-import ArrowUpward from '@material-ui/icons/ArrowUpward'
-import ArrowDownward from '@material-ui/icons/ArrowDownward'
+const useStyles = makeStyles((theme) => ({
+  flex1: {
+    flex: 1,
+    textAlign: 'center',
+    padding: theme.spacing(2),
+  },
+  noPadding: {
+    padding: 0,
+  },
+  rotated: {
+    transform: 'rotate(-45deg)',
+    position: 'relative',
+    left: '3px',
+  },
+  blockLink: {
+    display: 'block',
+  },
+}))
 
-class Footer extends React.Component {
-  render() {
-    let { classes, ...props } = this.props
+export default () => {
+  const classes = useStyles()
 
-    return pug`
-        // if accountLoaded
-        //   footer
-        //     Toolbar(className=classes.noPadding)
-        //       div(className=classes.flex1)
-        //         Link(
-        //           className=classes.blockLink
-        //           href='/account/deposit'
-        //           color= Router.route == '/account/deposit' ? 'secondary' : 'textPrimary'
-        //           underline='none'
-        //         )
-        //           ArrowUpward
-        //           .command Purchase
-        //       div(className=classes.flex1)
-        //         Link(
-        //           className=classes.blockLink
-        //           href='/account/send'
-        //           color= Router.route == '/account/send' ? 'secondary' : 'textPrimary'
-        //           underline='none'
-        //         )
-        //           Send(className=classes.rotated)
-        //           .command Send
-        //       div(className=classes.flex1)
-        //         Link(
-        //           className=classes.blockLink
-        //           href='/account/redeem'
-        //           color= Router.route == '/account/redeem' ? 'secondary' : 'textPrimary'
-        //           underline='none'
-        //         )
-        //           ArrowDownward
-        //           .command Redeem
-    `
-  }
+  return (
+    <div className='footer'>
+      <Toolbar className={classes.noPadding}>
+        <div className={classes.flex1}>
+          <Link className={classes.blockLink} href="/account/deposit" color={Router.route === '/account/deposit' ? 'secondary' : 'primary'} underline='none'>
+            <ArrowUpward />
+          </Link>
+        </div>
+        <div className={classes.flex1}>
+          <Link className={classes.blockLink} href="/account/send" color={Router.route === '/account/send' ? 'secondary' : 'primary'} underline='none'>
+            <Send className={classes.rotated} />
+          </Link>
+        </div>
+        <div className={classes.flex1}>
+          <Link className={classes.blockLink} href="/account/redeem" color={Router.route === '/account/redeem' ? 'secondary' : 'primary'} underline='none'>
+            <ArrowDownward />
+          </Link>
+        </div>
+      </Toolbar>
+    </div>
+  )
 }
-
-const styles = (theme) => {
-  return {
-    flex1: {
-      flex: 1,
-      textAlign: 'center',
-      padding: theme.spacing(2),
-    },
-    noPadding: {
-      padding: 0,
-    },
-    rotated: {
-      transform: 'rotate(-45deg)',
-      position: 'relative',
-      left: '3px',
-    },
-    blockLink: {
-      display: 'block',
-    },
-  }
-}
-
-export default withStyles(styles)(Footer)
-

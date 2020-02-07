@@ -1,61 +1,52 @@
-import React from 'react'
+import { useState } from 'react'
 import classnames from 'classnames'
+import { Typography } from '@material-ui/core'
 
-export let startLoading = (...args) => {
+export const startLoading = (...args) => {
 }
 
-export let stopLoading = (...args) => {
+export const stopLoading = (...args) => {
 }
 
-// catch any loading commands before initial render
-let loading = true
-let msg = ''
+export const loadable = (WrappedComponent) => {
+  const { props } = WrappedComponent
+  const newProps = {}
 
-export let loadable = (WrappedComponent) => {
-  class LoadableComponent extends React.Component {
-    render() {
-      let props = this.props
-      let newProps = {}
-
-      for (let key in props) {
-        if (this.props.hasOwnProperty(key)) {
-          newProps[key] = props[key]
-        }
-      }
-
-      newProps.startLoading = startLoading
-      newProps.stopLoading = stopLoading
-
-      return <WrappedComponent {...newProps} />
+  for (const key in props) {
+    if (this.props.hasOwnProperty(key)) {
+      newProps[key] = props[key]
     }
   }
 
-  return LoadableComponent
+  newProps.startLoading = startLoading
+  newProps.stopLoading = stopLoading
+
+  return <WrappedComponent {...newProps} />
 }
 
-export default class Loader extends React.Component {
-  constructor(props) {
-    super(props)
+export const Loader = (props) => {
+  const [loading, setLoading] = useState(props.loading)
+  const [unloading, setUnloading] = useState(props.unloading)
+  const [msg, setMsg] = useState(props.msg)
 
-    this.state = {
-      loading: loading,
-      unloading: false,
-      msg: msg,
-    }
-  }
 
   render() {
-    return pug`
-      .app-loader.columns(
-        className=classnames({
-          loading: this.state.loading,
-          unloading: this.state.unloading,
-        })
-      )
-        if this.state.loading
-          .content
-            h4.app-loader-message
-              = this.state.msg || 'Loading...'
-      `
+    const classes = ['app-loader', 'columns']
+    if (loading)
+      classes.push('loading')
+
+    if (unloading)
+      classes.push('unloading')
+    
+    return (
+      <div className={classnames(...classes)}>
+        {
+          loading ?
+          <div className={'content'}>
+            <Typography variant='h4' className={'app-loader-message'}>{msg || 'Loading...'}</Typography>
+          </div> : null
+        }
+      </div>
+    )
   }
 }
