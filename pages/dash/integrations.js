@@ -2,7 +2,7 @@ import { Component } from 'react'
 
 import Router, { withRouter } from 'next/router'
 import { inject, observer } from 'mobx-react'
-import { isLoggedIn } from '../../components/pages'
+import { IsLoggedIn } from '../../components/pages'
 import UserForm from '../../components/pages-dash/pages-users/UserForm'
 
 import css from 'styled-jsx/css'
@@ -22,7 +22,7 @@ import {
 
 import { STRIPE_CLIENT_ID, STRIPE_REDIRECT_URI } from '../../src/settings'
 
-@isLoggedIn
+@IsLoggedIn
 @inject("store")
 @observer
 class User extends Component {

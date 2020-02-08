@@ -20,7 +20,7 @@ const styles = makeStyles(() => ({
 export default (props) => {
   const classes = styles()
 
-  const { login } = props
+  const { login, loading, onLogin } = props
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
@@ -28,7 +28,6 @@ export default (props) => {
     email: '',
     password: '',
   })
-  const [isLoading, setIsLoading] = useState(false)
 
   // TODO Validate
   const handleError = (field, msg) => {
@@ -51,16 +50,15 @@ export default (props) => {
 
   const handleLogin = async () => {
     try {
-      setIsLoading(true)
-      login()
+      await login(email, password)
+      onLogin()
     } catch (ex) {
       console.error('Error', ex)
-      setIsLoading(false)
       handleError(ex.field, ex.msg)
     }
   }
 
-  const disabled = isLoading || email === '' || password === '' || error.email !== '' || error.password !== ''
+  const disabled = loading || email === '' || password === '' || error.email !== '' || error.password !== ''
 
   return (
     <FormGroup autoComplete='off'>

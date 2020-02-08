@@ -1,10 +1,10 @@
-import { makeStyles } from '@material-ui/core/styles'
-import React from 'react'
-
-import { isLoggedIn } from '../../components/pages'
+import { withStyles } from '@material-ui/core/styles'
+import { inject, observer } from 'mobx-react'
+import { Component } from 'react'
+import { IsLoggedIn } from '../../components/pages'
 import { Dashboard } from '../../components/pages-dash'
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   main: {
     paddingLeft: 200,
     paddingTop: 64,
@@ -16,16 +16,21 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(2),
     },
   },
-}))
-
-const Dash = isLoggedIn(() => {
-  const classes = useStyles()
-
-  return <>
-    <main className={classes.main} >
-      <Dashboard/>
-    </main>
-  </>
 })
 
-export default Dash
+@IsLoggedIn
+@inject('store')
+@observer
+class Dash extends Component {
+  render() {
+    const { classes, store } = this.props
+    console.log('dash store', store)
+    return (
+      <main className={classes.main}>
+        <Dashboard />
+      </main>
+    )
+  }
+}
+
+export default withStyles(styles)(Dash)

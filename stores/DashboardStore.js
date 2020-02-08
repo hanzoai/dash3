@@ -437,7 +437,7 @@ export default class DashboardStore {
       this.products = this.products.slice().sort((a, b) => b.sold - a.sold)
     })
 
-    console.log('p', this.products.slice())
+    // console.log('p', this.products.slice())
 
     return this.products
   }

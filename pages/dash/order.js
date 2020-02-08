@@ -2,12 +2,12 @@ import { Component } from 'react'
 
 import Router, { withRouter } from 'next/router'
 import { inject, observer } from 'mobx-react'
-import { isLoggedIn } from '../../components/pages'
+import { IsLoggedIn } from '../../components/pages'
 import { OrderForm } from '../../components/pages-dash/'
 
 import css from 'styled-jsx/css'
 
-@isLoggedIn
+@IsLoggedIn
 @inject("store")
 @observer
 class Order extends Component {

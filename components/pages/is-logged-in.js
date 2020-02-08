@@ -1,8 +1,14 @@
 import Router from 'next/router'
-import { useEffect } from 'react'
+import {
+  useEffect,
+} from 'react'
+
+import { useStore } from '../../stores'
 
 export default (PageComponent) => (props) => {
-  const { credentialStore } = props
+  const store = useStore()
+  const { credentialStore } = store
+  console.log('is-logged-in store', store)
   useEffect(() => {
     if (!credentialStore.isLoggedIn) {
       Router.push('/')

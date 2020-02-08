@@ -99,8 +99,7 @@ export default (props) => {
         <Typography variant='h5'>{org ? org.name : ''}</Typography>
         <IconButton
           className={classes.flex0}
-          ariaOwns={open ? 'menu-appbar' : null}
-          areaHaspopup='true'
+          aria-owns={open ? 'menu-appbar' : null}
           onClick={(event) => { setAnchorEl(event.currentTarget) }}
           color='inherit'
         >

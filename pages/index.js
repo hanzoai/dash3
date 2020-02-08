@@ -1,71 +1,64 @@
-import { Component } from 'react'
-
-import Router from 'next/router'
-import { inject, observer } from 'mobx-react'
-
-import { isLoggedOut } from '../components/pages'
-import LoginForm from '../components/pages-login/LoginForm'
-
 import {
   Card,
   CardContent,
   Grid,
 } from '@material-ui/core'
-
-import css from 'styled-jsx/css'
-
+import { withStyles } from '@material-ui/core/styles'
+import classnames from 'classnames'
+import { inject, observer } from 'mobx-react'
+import Router from 'next/router'
+import { Component } from 'react'
 import logoImg from '../assets/images/logo-dark.svg'
+import { IsLoggedOut } from '../components/pages'
+import LoginForm from '../components/pages-login/LoginForm'
 
-@isLoggedOut
-@inject("store")
+const styles = {
+  index: {
+    backgroundColor: '#1a237e',
+    backgroundPosition: 'center',
+    backgroundSize: 'cover',
+  },
+  logo: {
+    maxHeight: '100px',
+  },
+  container: {
+    minHeight: '100vh',
+    height: 'auto',
+    padding: 0,
+    textAlign: 'center',
+  },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.8)',
+  },
+  checkbox: {
+    justifyContent: 'center',
+  },
+}
+
+@IsLoggedOut
+@inject('store')
 @observer
 class Index extends Component {
-  constructor(props) {
-    super(props)
-  }
-
-  onLogin() {
-    Router.push('/dash')
-  }
-
   render() {
-    return <> {
-      pug`
-        main#index
-          Grid.container(container justify='center' alignItems='center')
-            Grid(item xs=12 sm=4)
-              Card.card
-                CardContent
-                  img.logo(src=logoImg)
-                  br
-                  br
-                  LoginForm(
-                    onLogin=this.onLogin
-                  )
-      `}
-      <style jsx global>{`
-        #index
-          background-color: #1a237e
-          background-position: center
-          background-size: cover
-
-          .logo
-            max-height: 100px
-
-          .container
-            min-height: 100vh
-            height: auto
-            padding: 0
-            text-align: center
-
-          .card
-            background-color: rgba(255,255,255,0.8)
-
-          .checkbox
-            justify-content: center
-      `}</style>
-    </>
+    const { classes, store } = this.props
+    console.log('Store', store.credentialStore.login)
+    return (
+      <Grid container id='main' className={classnames(classes.index, classes.container)} justify='center' alignItems='center'>
+        <Grid item xs={12} sm={4}>
+          <Card className={classes.card}>
+            <CardContent>
+              <img className={classes.logo} src={logoImg} alt='logo' />
+              <LoginForm
+                onLogin={() => { Router.push('/dash') }}
+                login={(u, p) => { store.credentialStore.login(u, p) }}
+                loading={store.credentialStore.loading}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    )
   }
 }
 
-export default Index
+export default withStyles(styles)(Index)

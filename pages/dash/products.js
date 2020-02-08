@@ -1,7 +1,7 @@
 import { Component } from 'react'
 
 import { inject, observer } from 'mobx-react'
-import { isLoggedIn } from '../../components/pages'
+import { IsLoggedIn } from '../../components/pages'
 import { ProductsSearch } from '../../components/pages-dash'
 
 import {
@@ -13,7 +13,7 @@ import {
 import css from 'styled-jsx/css'
 import capitalize from '../../src/string/capitalize'
 
-@isLoggedIn
+@IsLoggedIn
 @inject("store")
 @observer
 class Index extends Component {
