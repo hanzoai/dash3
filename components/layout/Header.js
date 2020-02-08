@@ -11,10 +11,13 @@ import { fade } from '@material-ui/core/styles/colorManipulator'
 import {
   AccountCircle,
 } from '@material-ui/icons'
+import { observer } from 'mobx-react'
 import Router from 'next/router'
 import { useState } from 'react'
 import logoImg from '../../assets/images/logo.svg'
+import { useStore } from '../../stores'
 import Link from '../link'
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -78,8 +81,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export default (props) => {
+export default observer(() => {
   const classes = useStyles()
+  const { credentialStore } = useStore()
   const [anchorEl, setAnchorEl] = useState(null)
   // const [query, setQuery] = useState(null)
 
@@ -87,7 +91,7 @@ export default (props) => {
   //   setQuery(qs.parse(window.location.search))
   // }, [])
 
-  const { org, user, logout } = props
+  const { org, user } = credentialStore
   const open = !!anchorEl
 
   return (
@@ -123,7 +127,7 @@ export default (props) => {
             <Typography variant='body1'>{`Hi, ${user ? user.firstName : 'UKNOWN'}`}</Typography>
           </MenuItem>
           <MenuItem onClick={() => {
-            logout()
+            credentialStore.logout()
             setAnchorEl(null)
             Router.push('/')
           }}>
@@ -133,4 +137,4 @@ export default (props) => {
       </Toolbar>
     </AppBar>
   )
-}
+})

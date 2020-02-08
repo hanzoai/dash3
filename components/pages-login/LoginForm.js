@@ -6,7 +6,9 @@ import {
   TextField,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
+import { observer } from 'mobx-react'
 import { useState } from 'react'
+import { useStore } from '../../stores'
 
 const styles = makeStyles(() => ({
   centerCheckbox: {
@@ -17,48 +19,34 @@ const styles = makeStyles(() => ({
   },
 }))
 
-export default (props) => {
+export default observer((props) => {
   const classes = styles()
-
-  const { login, loading, onLogin } = props
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [remember, setRemember] = useState(false)
-  const [error, setError] = useState({
-    email: '',
-    password: '',
-  })
+  const { credentialStore } = useStore()
+  const { onLogin } = props
 
   // TODO Validate
   const handleError = (field, msg) => {
-    setError({ ...error, [field]: msg })
-  }
-
-  const handleEmail = (evt) => {
-    handleError('email', '')
-    setEmail(evt.target.value)
-  }
-
-  const handlePassword = (evt) => {
-    handleError('password', '')
-    setPassword(evt.target.value)
-  }
-
-  const handleRemember = (evt) => {
-    setRemember(evt.target.checked)
+    credentialStore.setError(field, msg)
   }
 
   const handleLogin = async () => {
+    credentialStore.setProperty('isLoading', true)
     try {
-      await login(email, password)
+      await credentialStore.login()
       onLogin()
     } catch (ex) {
       console.error('Error', ex)
       handleError(ex.field, ex.msg)
+    } finally {
+      credentialStore.setProperty('isLoading', false)
     }
   }
 
-  const disabled = loading || email === '' || password === '' || error.email !== '' || error.password !== ''
+  const disabled = credentialStore.isLoading
+        || credentialStore.email === ''
+        || credentialStore.password === ''
+        || credentialStore.errors.email !== ''
+        || credentialStore.errors.password !== ''
 
   return (
     <FormGroup autoComplete='off'>
@@ -67,10 +55,10 @@ export default (props) => {
         variant='outlined'
         label='Email'
         type='email'
-        value={email}
+        value={credentialStore.email}
         required
-        onChange={handleEmail}
-        error={error.email !== ''}
+        onChange={(evt) => { credentialStore.setProperty('email', evt.target.value) }}
+        error={credentialStore.errors.email !== ''}
         className={classes.itemPadding}
       />
       <TextField
@@ -79,14 +67,18 @@ export default (props) => {
         label='Password'
         type='password'
         required
-        value={password}
-        onChange={handlePassword}
-        error={error.password !== ''}
+        value={credentialStore.password}
+        onChange={(evt) => { credentialStore.setProperty('password', evt.target.value) }}
+        error={credentialStore.errors.password !== ''}
         className={classes.itemPadding}
       />
       <FormControlLabel
         control={
-          <Checkbox checked={remember} onChange={handleRemember} value='remember' />
+          <Checkbox
+            checked={credentialStore.remember}
+            onChange={(evt) => { credentialStore.setProperty('remember', evt.target.checked) }}
+            value='remember'
+          />
         }
         label='Remember Me'
         className={classes.centerCheckbox}
@@ -101,4 +93,4 @@ export default (props) => {
       > LOGIN </Button>
     </FormGroup>
   )
-}
+})

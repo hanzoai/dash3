@@ -27,7 +27,10 @@ export default class CredentialStore {
 
   @observable remember = true
 
-  @observable errors = {}
+  @observable errors = {
+    email: '',
+    password: '',
+  }
 
   constructor(data, hanzoApi) {
     this.api = hanzoApi

@@ -23,8 +23,7 @@ const styles = (theme) => ({
 @observer
 class Dash extends Component {
   render() {
-    const { classes, store } = this.props
-    console.log('dash store', store)
+    const { classes } = this.props
     return (
       <main className={classes.main}>
         <Dashboard />

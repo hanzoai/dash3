@@ -8,7 +8,6 @@ import { useStore } from '../../stores'
 export default (PageComponent) => (props) => {
   const store = useStore()
   const { credentialStore } = store
-  console.log('is-logged-in store', store)
   useEffect(() => {
     if (!credentialStore.isLoggedIn) {
       Router.push('/')

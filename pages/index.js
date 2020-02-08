@@ -41,7 +41,6 @@ const styles = {
 class Index extends Component {
   render() {
     const { classes, store } = this.props
-    console.log('Store', store.credentialStore.login)
     return (
       <Grid container id='main' className={classnames(classes.index, classes.container)} justify='center' alignItems='center'>
         <Grid item xs={12} sm={4}>

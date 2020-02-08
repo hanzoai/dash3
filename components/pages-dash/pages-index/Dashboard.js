@@ -17,10 +17,6 @@ import {
   TotalUsers,
 } from './charts'
 
-import {
-  PageViewsDate,
-} from './ga'
-
 const Dashboard = observer(() => {
   const {
     dashboardStore,
