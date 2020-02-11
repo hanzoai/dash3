@@ -110,9 +110,9 @@ class MyApp extends App {
                   </>
                 }
                 <Component/>
-                { !isIndex
+                {/* !isIndex
                   && <Footer/>
-                }
+                */}
               </div>
             </StoreProvider>
           </Provider>

@@ -17,6 +17,7 @@ export default (props) => {
     hrefAs,
     children,
     target,
+    color,
   } = props
 
   return (
@@ -24,7 +25,7 @@ export default (props) => {
     {
       href && href[0] === '/' && !target ?
       <Link href={href} as={hrefAs}>
-        <MUILink className={`${classes.root} ${className}`}>
+        <MUILink color={color} className={`${classes.root} ${className}`}>
           {children}
         </MUILink>
       </Link>
@@ -32,6 +33,7 @@ export default (props) => {
         href={href}
         target={target}
         rel={target ? 'noopener' : ''}
+        color={color}
         className={`${classes.root} ${className}`}
       >
         {children}

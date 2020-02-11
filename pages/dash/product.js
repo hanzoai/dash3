@@ -32,7 +32,7 @@ class Product extends Component {
   componentDidMount() {
     const { router, store } = this.props
     let { id } = router.query
-    const { ordersStore } = store
+    const { productsStore } = store
 
     if (!id && typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
@@ -41,8 +41,8 @@ class Product extends Component {
 
     // if there is an id then start in normal mode
     if (id) {
-      ordersStore.getOrder(id).catch((e) => {
-        console.log('order page error', e)
+      productsStore.getProduct(id).catch((e) => {
+        console.log('product page error', e)
         Router.push('/dash')
       })
     } else {

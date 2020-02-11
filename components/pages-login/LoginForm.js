@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { observer } from 'mobx-react'
-import { useState } from 'react'
 import { useStore } from '../../stores'
 
 const styles = makeStyles(() => ({
