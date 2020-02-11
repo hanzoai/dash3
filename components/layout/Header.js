@@ -18,8 +18,6 @@ import logoImg from '../../assets/images/logo.svg'
 import { useStore } from '../../stores'
 import Link from '../link'
 
-
-
 const useStyles = makeStyles((theme) => ({
   root: {
     zIndex: theme.zIndex.drawer + 1,

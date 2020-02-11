@@ -106,7 +106,7 @@ class MyApp extends App {
                 { !isIndex
                   && <>
                     <Header singleSubmit={false} />
-                    <Drawer variant='permanent' />
+                    <Drawer />
                   </>
                 }
                 <Component/>
