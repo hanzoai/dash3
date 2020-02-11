@@ -1,39 +1,33 @@
-import { Component } from 'react'
 import Router from 'next/router'
-import { inject, observer } from 'mobx-react'
+import {
+  useEffect,
+} from 'react'
 
-export default function (PageComponent) {
-  @inject("store")
-  @observer
-  class LoggedInPage extends Component {
-    constructor(props) {
-      super(props)
+import { useStore } from '../../stores'
+
+export default (PageComponent) => (props) => {
+  const store = useStore()
+  const { credentialStore } = store
+  useEffect(() => {
+    if (!credentialStore.isLoggedIn) {
+      Router.push('/')
+      return
     }
 
-    componentDidMount() {
-      const credentialStore = this.props.store.credentialStore
-      if (!credentialStore.isLoggedIn) {
-        Router.push('/')
-        return
-      }
+    if (!credentialStore.org) {
+      credentialStore.getOrg()
+        .then(() => {
+          console.log('still logged in')
+        }).catch((e) => {
+          console.log('not logged in, logging out')
 
-      if (!credentialStore.org) {
-        credentialStore.getOrg()
-          .then(() => {
-            console.log('still logged in')
-          }).catch((e) => {
-            console.log('not logged in, logging out')
-
-            credentialStore.logout()
-            Router.push('/')
-          })
-      }
+          credentialStore.logout()
+          Router.push('/')
+        })
     }
+  }, [])
 
-    render() {
-      return pug`PageComponent(...this.props)`
-    }
-  }
-
-  return LoggedInPage
+  return (
+    <PageComponent {...props} />
+  )
 }

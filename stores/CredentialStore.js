@@ -27,7 +27,10 @@ export default class CredentialStore {
 
   @observable remember = true
 
-  @observable errors = {}
+  @observable errors = {
+    email: '',
+    password: '',
+  }
 
   constructor(data, hanzoApi) {
     this.api = hanzoApi
@@ -97,13 +100,15 @@ export default class CredentialStore {
     }
   }
 
-  @action async login() {
+  @action async login(username, password) {
     this.isLoading = true
 
     try {
+      const user = username || this.email
+      const pass = password || this.password
       const res = await this.api.client.dashv2.login({
-        email: this.email,
-        password: this.password,
+        email: user,
+        password: pass,
         // client_id: this.inputs.organization.val(),
         // grant_type: 'password',
       })

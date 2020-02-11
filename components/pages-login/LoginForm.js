@@ -1,129 +1,96 @@
-import { Component } from 'react'
-import { inject, observer } from 'mobx-react'
-import midstream from 'midstream'
-
-import {
-  MUIText,
-  MUICheckbox,
-} from '@hanzo/react'
-
 import {
   Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  TextField,
 } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
+import { observer } from 'mobx-react'
+import { useState } from 'react'
+import { useStore } from '../../stores'
 
-import classnames from 'classnames'
+const styles = makeStyles(() => ({
+  centerCheckbox: {
+    justifyContent: 'center',
+  },
+  itemPadding: {
+    marginBottom: '1em',
+  },
+}))
 
-import {
-  isRequired,
-  isEmail,
-  isPassword,
-} from '@hanzo/middleware'
+export default observer((props) => {
+  const classes = styles()
+  const { credentialStore } = useStore()
+  const { onLogin } = props
 
-@inject("store")
-@observer
-class LoginForm extends Component {
-  constructor(props) {
-    super(props)
-
-    let credentialStore = props.store.credentialStore
-
-    this.ms = midstream({
-      email:    [isRequired, isEmail],
-      password: [isRequired, isPassword],
-      remember: []
-    }, {
-      dst:    credentialStore,
-      errors: credentialStore.errors,
-    })
-
-    this.state = {
-      error: false,
-      isLoading: false
-    }
+  // TODO Validate
+  const handleError = (field, msg) => {
+    credentialStore.setError(field, msg)
   }
 
-  async submit() {
-    this.setState({
-      error: false,
-      isLoading: true,
-    })
-
+  const handleLogin = async () => {
+    credentialStore.setProperty('isLoading', true)
     try {
-      await this.ms.source.runAll()
-      await this.ms.dst.login()
-
-      this.props.onLogin()
-    } catch (e) {
-      this.setState({
-        error: e.message || e,
-      })
+      await credentialStore.login()
+      onLogin()
+    } catch (ex) {
+      console.error('Error', ex)
+      handleError(ex.field, ex.msg)
+    } finally {
+      credentialStore.setProperty('isLoading', false)
     }
-
-    this.setState({
-        isLoading: false,
-    })
   }
 
-  render() {
-    const { hooks, dst, errors } = this.ms
-    const { error, isLoading } = this.state
-    const disabled = isLoading || dst.isLoading
+  const disabled = credentialStore.isLoading
+        || credentialStore.email === ''
+        || credentialStore.password === ''
+        || credentialStore.errors.email !== ''
+        || credentialStore.errors.password !== ''
 
-    const [
-      getEmail,
-      setEmail
-    ] = hooks.email
-
-    const [
-      getPassword,
-      setPassword
-    ] = hooks.password
-
-    const [
-      getRemember,
-      setRemember
-    ] = hooks.remember
-
-    return pug`
-      .login-form.form
-        .error
-          =error
-        MUIText(
-          label='Email'
-          variant='outlined'
-          disabled=disabled
-          value=dst.email
-          error=errors.email
-          setValue=setEmail
-        )
-        br
-        MUIText(
-          label='Password'
-          variant='outlined'
-          type='password'
-          disabled=disabled
-          value=dst.password
-          error=errors.password
-          setValue=setPassword
-        )
-        MUICheckbox(
-          label='Remember Me'
-          disabled=disabled
-          value=dst.remember
-          error=errors.remember
-          setValue=setRemember
-        )
-        Button(
-          size='large'
-          variant='contained'
-          color='primary'
-          type='submit'
-          disabled=disabled
-          onClick=() => this.submit()
-        )
-          | LOGIN
-    `
-  }
-}
-
-export default LoginForm
+  return (
+    <FormGroup autoComplete='off'>
+      <TextField
+        id='emai'
+        variant='outlined'
+        label='Email'
+        type='email'
+        value={credentialStore.email}
+        required
+        onChange={(evt) => { credentialStore.setProperty('email', evt.target.value) }}
+        error={credentialStore.errors.email !== ''}
+        className={classes.itemPadding}
+      />
+      <TextField
+        id='password'
+        variant='outlined'
+        label='Password'
+        type='password'
+        required
+        value={credentialStore.password}
+        onChange={(evt) => { credentialStore.setProperty('password', evt.target.value) }}
+        error={credentialStore.errors.password !== ''}
+        className={classes.itemPadding}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={credentialStore.remember}
+            onChange={(evt) => { credentialStore.setProperty('remember', evt.target.checked) }}
+            value='remember'
+          />
+        }
+        label='Remember Me'
+        className={classes.centerCheckbox}
+      />
+      <Button
+        size='large'
+        variant='contained'
+        color='primary'
+        type='submit'
+        disabled={disabled}
+        onClick={handleLogin}
+      > LOGIN </Button>
+    </FormGroup>
+  )
+})

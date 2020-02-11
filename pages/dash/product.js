@@ -1,14 +1,24 @@
-import { Component } from 'react'
-
-import Router, { withRouter } from 'next/router'
+import { withStyles } from '@material-ui/styles'
 import { inject, observer } from 'mobx-react'
-import { isLoggedIn } from '../../components/pages'
+import Router, { withRouter } from 'next/router'
+import { Component } from 'react'
+import { IsLoggedIn } from '../../components/pages'
 import { ProductForm } from '../../components/pages-dash'
 
-import css from 'styled-jsx/css'
+const styles = () => ({
+  product: {
+    paddingLeft: '200px',
+    paddingTop: '80px',
+    width: '100vw',
+    '& > *': {
+      margin: '0px',
+      padding: '8px',
+    },
+  },
+})
 
-@isLoggedIn
-@inject("store")
+@IsLoggedIn
+@inject('store')
 @observer
 class Product extends Component {
   constructor(props) {
@@ -20,17 +30,19 @@ class Product extends Component {
   }
 
   componentDidMount() {
-    let id = this.props.router.query.id
+    const { router, store } = this.props
+    let { id } = router.query
+    const { ordersStore } = store
 
     if (!id && typeof window !== 'undefined') {
-      let params = new URLSearchParams(window.location.search)
+      const params = new URLSearchParams(window.location.search)
       id = params.get('id')
     }
 
     // if there is an id then start in normal mode
     if (id) {
-      this.props.store.productsStore.getProduct(id).catch((e) => {
-        console.log('product page error', e)
+      ordersStore.getOrder(id).catch((e) => {
+        console.log('order page error', e)
         Router.push('/dash')
       })
     } else {
@@ -39,23 +51,14 @@ class Product extends Component {
   }
 
   render() {
-    return <> {
-      pug`
-        main#dash.product
-          ProductForm(doCreate=this.state.create)
-      `}
-      <style jsx global>{`
-        #dash.product
-          padding-left: 200px
-          padding-top: 80px
-          width: 100vw
-
-          & > *
-            margin: 0px
-            padding: 8px
-      `}</style>
-    </>
+    const { classes } = this.props
+    const { create } = this.state
+    return (
+      <main className={classes.product}>
+        <ProductForm doCreate={create} />
+      </main>
+    )
   }
 }
 
-export default withRouter(Product)
+export default withRouter(withStyles(styles)(Product))

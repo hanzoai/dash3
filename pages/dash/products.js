@@ -1,69 +1,57 @@
-import { Component } from 'react'
-
+import { withStyles } from '@material-ui/styles'
 import { inject, observer } from 'mobx-react'
-import { isLoggedIn } from '../../components/pages'
+import { Component } from 'react'
+import { IsLoggedIn } from '../../components/pages'
 import { ProductsSearch } from '../../components/pages-dash'
 
-import {
-  Grid,
-  Typography,
-  LinearProgress,
-} from '@material-ui/core'
+const styles = () => ({
+  products: {
+    paddingLeft: '200px',
+    paddingTop: '80px',
+    width: '100vw',
+    'products-search-form': {
+      padding: '0 8px',
+      width: '100%',
+      margin: 0,
+    },
+    'MuiExpansionPanelDetails-root': {
+      flexDirection: 'column',
+    },
+    table: {
+      width: '100%',
+      'MuiTablePagination-root': {
+        border: 0,
+      },
+      'MuiPaper-root': {
+        boxShadow: 'none',
+        borderRadius: 0,
+        '& > div': {
+          overflow: 'initial !important',
+          '& > div > div': {
+            overflow: 'initial !important',
+          },
+        },
+      },
+      th: {
+        top: '64px',
+        position: 'sticky',
+      },
+    },
+  },
+})
 
-import css from 'styled-jsx/css'
-import capitalize from '../../src/string/capitalize'
-
-@isLoggedIn
-@inject("store")
+@IsLoggedIn
+@inject('store')
 @observer
-class Index extends Component {
-  constructor(props) {
-    super(props)
-  }
-
+class Products extends Component {
   render() {
-    return <> {
-      pug`
-        main#dash.products
-          ProductsSearch
-      `}
-      <style jsx global>{`
-        #dash.products
-          padding-left: 200px
-          padding-top: 80px
-          width: 100vw
-
-          .products-search-form
-            padding: 0 8px
-            width: 100%
-            margin: 0
-
-
-          .MuiExpansionPanelDetails-root
-            flex-direction: column
-
-          .table
-            width: 100%
-
-            .MuiTablePagination-root
-              border: 0
-
-            .MuiPaper-root
-              box-shadow: none
-              border-radius: 0
-
-              & > div
-                overflow: initial !important
-
-                & > div > div
-                  overflow: initial !important
-
-            th
-              top: 64px
-              position: sticky
-      `}</style>
-    </>
+    const { classes } = this.props
+    return (
+      <main className={classes.products}>
+        <ProductsSearch />
+      </main>
+    )
   }
 }
 
-export default Index
+export default withStyles(styles)(Products)

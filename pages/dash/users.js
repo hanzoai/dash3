@@ -1,7 +1,7 @@
 import { makeStyles } from '@material-ui/core/styles'
 import React from 'react'
 
-import { isLoggedIn } from '../../components/pages'
+import { IsLoggedIn } from '../../components/pages'
 import { UsersSearch } from '../../components/pages-dash'
 
 const useStyles = makeStyles((theme) => ({
@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const Users = isLoggedIn(() => {
+const Users = IsLoggedIn(() => {
   const classes = useStyles()
 
   return <>

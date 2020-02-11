@@ -37,10 +37,10 @@ export default class MyDocument extends Document {
             name='msapplication-tap-highlight'
             content='no'
           />
-          <link
+          {/* <link
             rel='manifest'
             href='/static/manifest.json'
-          />
+          /> */}
           <link
             rel='icon'
             type='image/png'
