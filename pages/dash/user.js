@@ -33,7 +33,7 @@ class User extends Component {
   componentDidMount() {
     const { router, store } = this.props
     let { id } = router.query
-    const { ordersStore } = store
+    const { usersStore } = store
 
     if (!id && typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
@@ -42,8 +42,8 @@ class User extends Component {
 
     // if there is an id then start in normal mode
     if (id) {
-      ordersStore.getOrder(id).catch((e) => {
-        console.log('order page error', e)
+      usersStore.getUser(id).catch((e) => {
+        console.log('user page error', e)
         Router.push('/dash')
       })
     } else {
@@ -55,7 +55,7 @@ class User extends Component {
     const { classes } = this.props
     const { create } = this.state
     return (
-      <main classNames={classes.user}>
+      <main className={classes.user}>
         <UserForm doCreate={create} />
       </main>
     )
