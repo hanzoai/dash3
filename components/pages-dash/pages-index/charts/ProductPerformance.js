@@ -20,14 +20,22 @@ const columns = [
     field: 'name',
   },
   {
+    title: 'Revenue',
+    field: 'revenue',
+    render: (row) => renderUICurrencyFromJSON(
+      row.currency,
+      row.revenue - row.refunded * row.price,
+    ),
+  },
+  {
     title: 'Sold',
     field: 'sold',
     render: (row) => row.sold,
   },
   {
-    title: 'Revenue',
-    field: 'revenue',
-    render: (row) => renderUICurrencyFromJSON(row.currency, row.revenue),
+    title: 'Refunded',
+    field: 'refunded',
+    render: (row) => row.refunded,
   },
 ]
 
