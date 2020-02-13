@@ -168,10 +168,10 @@ export default class DashboardStore {
       now = now.subtract(1, 'day')
     }
     chartDates.unshift(moment(now).subtract(1, 'day'))
-    this.chartDates = chartDates
+    // this.chartDates = chartDates
 
     try {
-      const psWeekly = this.chartDates.map((n) => (
+      const psWeekly = chartDates.map((n) => (
         this.api.client.counter.search({
           tag: 'order.count',
           period: 'hourly',
@@ -181,7 +181,7 @@ export default class DashboardStore {
         })
       ))
 
-      const psLastWeekly = this.chartDates.map((n) => (
+      const psLastWeekly = chartDates.map((n) => (
         this.api.client.counter.search({
           tag: 'order.count',
           period: 'hourly',
@@ -191,7 +191,7 @@ export default class DashboardStore {
         })
       ))
 
-      const psWeeklyRefunded = this.chartDates.map((n) => (
+      const psWeeklyRefunded = chartDates.map((n) => (
         this.api.client.counter.search({
           tag: 'order.refunded.count',
           period: 'hourly',
@@ -201,7 +201,7 @@ export default class DashboardStore {
         })
       ))
 
-      const psLastWeeklyRefunded = this.chartDates.map((n) => (
+      const psLastWeeklyRefunded = chartDates.map((n) => (
         this.api.client.counter.search({
           tag: 'order.refunded.count',
           period: 'hourly',
