@@ -21,6 +21,7 @@ import {
 } from '../../../../src/currency'
 
 import { useStore } from '../../../../stores'
+import TimeSelect from './TimeSelect'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -99,7 +100,7 @@ const TotalRevenue = observer((props) => {
               gutterBottom
               variant='body2'
             >
-              TOTAL REVENUE
+              REVENUE
             </Typography>
             <Typography variant='h4'>{renderUICurrencyFromJSON(currency, dashboardStore.totalRevenue) }</Typography>
           </Grid>
@@ -139,12 +140,18 @@ const TotalRevenue = observer((props) => {
               </Typography>
             </>
           }
-          <Typography
-            className={classes.caption}
-            variant='caption'
-          >
-            Since last week
-          </Typography>
+          <TimeSelect
+            inputLabel='Change Timeframe'
+            id='for-rev'
+            value={dashboardStore.revSelect}
+            onChange={(evt) => {
+              if (evt.target.value === 4) {
+                dashboardStore.setDate('rev', evt.target.value, { date: credentialStore.org.createdAt, period: 'day' })
+              } else {
+                dashboardStore.setDate('rev', evt.target.value)
+              }
+            }}
+          />
         </div>
       </CardContent>
     </Card>

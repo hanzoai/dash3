@@ -19,10 +19,6 @@ import { makeStyles } from '@material-ui/styles'
 
 import { observer } from 'mobx-react'
 
-import moment from 'moment-timezone'
-
-import React from 'react'
-
 import { Bar } from 'react-chartjs-2'
 
 import { useStore } from '../../../../stores'
@@ -51,21 +47,22 @@ const TotalSales = observer((props) => {
   const currency = credentialStore.org ? credentialStore.org.currency : ''
 
   const {
-    weeklyDates,
+    chartDates,
     weeklyRevenuePoints,
     lastWeeklyRevenuePoints,
+    chartPeriod,
   } = dashboardStore
 
   const data = {
-    labels: weeklyDates.slice().map((d) => moment(d).format('D MMM')),
+    labels: chartDates.slice().map((d) => d.format('D MMM')),
     datasets: [
+      // {
+      //   label: `Last ${chartPeriod}`,
+      //   backgroundColor: indigo[500],
+      //   data: lastWeeklyRevenuePoints.slice(),
+      // },
       {
-        label: 'Last Week',
-        backgroundColor: indigo[500],
-        data: lastWeeklyRevenuePoints.slice(),
-      },
-      {
-        label: 'This Week',
+        label: `This ${chartPeriod}`,
         backgroundColor: blue[500],
         data: weeklyRevenuePoints.slice(),
       },
@@ -78,15 +75,7 @@ const TotalSales = observer((props) => {
       className={classes.root}
     >
       <CardHeader
-        action={
-          <Button
-            size='small'
-            variant='text'
-          >
-            Last 7 days <ArrowDropDownIcon />
-          </Button>
-        }
-        title='Latest Sales'
+        title='Sales by Day'
       />
       <Divider />
       <CardContent>

@@ -82,6 +82,15 @@ const DailyRevenue = observer((props) => {
 
   const currency = credentialStore.org ? credentialStore.org.currency : ''
 
+  let currentAvg = 0
+  weeklyRevenuePoints.forEach((r) => { currentAvg += r })
+  currentAvg /= weeklyRevenuePoints.length
+  currentAvg = Number.parseInt(currentAvg, 10)
+
+  let prevAvg = 0
+  weeklyRevenuePoints.forEach((r) => { prevAvg += r })
+  prevAvg /= weeklyRevenuePoints.length
+
   return (
     <Card
       {...props}
@@ -98,12 +107,12 @@ const DailyRevenue = observer((props) => {
               gutterBottom
               variant='body2'
             >
-              DAILY REVENUE
+              AVERAGE DAILY REVENUE
             </Typography>
-            <Typography variant='h4'>{renderUICurrencyFromJSON(currency, weeklyRevenuePoints[6]) }</Typography>
+            <Typography variant='h4'>{renderUICurrencyFromJSON(currency, currentAvg) }</Typography>
           </Grid>
           <Grid item>
-            { weeklyRevenuePoints[6] >= weeklyRevenuePoints[5]
+            { currentAvg >= prevAvg
               ? <Avatar className={classes.successAvatar}>
                   <PaymentOutlinedIcon className={classes.icon} />
                 </Avatar>
@@ -114,7 +123,7 @@ const DailyRevenue = observer((props) => {
           </Grid>
         </Grid>
         <div className={classes.difference}>
-          { weeklyRevenuePoints[6] >= weeklyRevenuePoints[5]
+          { currentAvg >= prevAvg
             ? <>
               <ArrowUpwardIcon className={classes.successDifferenceIcon} />
               <Typography
@@ -122,8 +131,8 @@ const DailyRevenue = observer((props) => {
                 variant='body2'
               >
                 {
-                  weeklyRevenuePoints[5]
-                    ? ((weeklyRevenuePoints[6] / weeklyRevenuePoints[5]) * 100).toFixed(2)
+                  prevAvg
+                    ? ((currentAvg / prevAvg) * 100).toFixed(2)
                     : 100
                 }%
               </Typography>
@@ -134,7 +143,7 @@ const DailyRevenue = observer((props) => {
                 className={classes.errorDifferenceValue}
                 variant='body2'
               >
-                { (-100 + (weeklyRevenuePoints[6] / weeklyRevenuePoints[5]) * 100).toFixed(2) }%
+                { (-100 + (currentAvg / prevAvg) * 100).toFixed(2) }%
               </Typography>
             </>
           }
@@ -142,7 +151,7 @@ const DailyRevenue = observer((props) => {
             className={classes.caption}
             variant='caption'
           >
-            Since yesterday
+            This period
           </Typography>
         </div>
       </CardContent>

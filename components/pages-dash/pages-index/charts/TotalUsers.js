@@ -17,6 +17,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 
 import { useStore } from '../../../../stores'
+import TimeSelect from './TimeSelect'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,6 +69,7 @@ const TotalUsers = observer((props) => {
   const classes = useStyles()
 
   const {
+    credentialStore,
     dashboardStore,
   } = useStore()
 
@@ -92,7 +94,7 @@ const TotalUsers = observer((props) => {
               gutterBottom
               variant='body2'
             >
-              TOTAL USERS
+              USERS
             </Typography>
             <Typography variant='h4'>{ dashboardStore.totalUsers }</Typography>
           </Grid>
@@ -132,12 +134,19 @@ const TotalUsers = observer((props) => {
               </Typography>
             </>
           }
-          <Typography
-            className={classes.caption}
-            variant='caption'
-          >
-            Since last week
-          </Typography>
+          <TimeSelect
+            inputLabel='Change Timeframe'
+            id='for-users'
+            value={dashboardStore.usersSelect}
+            disabled
+            onChange={(evt) => {
+              if (evt.target.value === 4) {
+                dashboardStore.setDate('users', evt.target.value, { date: credentialStore.org.createdAt, period: 'day' })
+              } else {
+                dashboardStore.setDate('users', evt.target.value)
+              }
+            }}
+          />
         </div>
       </CardContent>
     </Card>
