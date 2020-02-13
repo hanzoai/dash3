@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { observer } from 'mobx-react'
-import { useState } from 'react'
 import { useStore } from '../../stores'
 
 const styles = makeStyles(() => ({
@@ -51,7 +50,7 @@ export default observer((props) => {
   return (
     <FormGroup autoComplete='off'>
       <TextField
-        id='emai'
+        id='email'
         variant='outlined'
         label='Email'
         type='email'

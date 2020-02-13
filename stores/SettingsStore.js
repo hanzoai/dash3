@@ -1,10 +1,17 @@
-import { action, observable, computed, autorun, runInAction } from "mobx"
-
 import akasha from 'akasha'
 import { renderDate, rfc3339 } from '@hanzo/utils'
 
+import {
+  action,
+  autorun,
+  computed,
+  observable,
+  runInAction,
+} from 'mobx'
+
 export default class SettingsStore {
   @observable lastChecked = undefined
+
   @observable countries = []
 
   @observable isLoading = false
@@ -19,18 +26,18 @@ export default class SettingsStore {
 
   save() {
     akasha.set('library.lastChecked', this.lastChecked)
-    akasha.set('library.countries',   this.countries)
+    akasha.set('library.countries', this.countries)
   }
 
   @action async load() {
     this.isLoading = true
-    this.countries   = akasha.get('library.countries') || []
+    this.countries = akasha.get('library.countries') || []
     this.lastChecked = renderDate(new Date(), rfc3339)
 
     try {
-      let res = await this.api.client.library.daisho({
-        hasCountries:       !!this.countries && this.countries.length != 0,
-        lastChecked:        renderDate(this.lastChecked || '2000-01-01', rfc3339),
+      const res = await this.api.client.library.daisho({
+        hasCountries: !!this.countries && this.countries.length !== 0,
+        lastChecked: renderDate(this.lastChecked || '2000-01-01', rfc3339),
       })
 
       runInAction(() => {
@@ -39,7 +46,7 @@ export default class SettingsStore {
         this.save()
         this.isLoading = false
       })
-    } catch(e) {
+    } catch (e) {
       runInAction(() => {
         this.isLoading = false
       })
@@ -58,16 +65,16 @@ export default class SettingsStore {
   }
 
   @computed get countryOptions() {
-    let countries = this.countries.slice().sort((a, b) => {
+    const countries = this.countries.slice().sort((a, b) => {
       if (a.name < b.name) { return -1 }
       if (a.name > b.name) { return 1 }
       return 0
     })
 
-    let options = {}
+    const options = {}
 
-    for (let k in countries) {
-      let country = countries[k]
+    for (const k in countries) {
+      const country = countries[k]
       options[country.code.toUpperCase()] = country.name
     }
 
@@ -75,26 +82,27 @@ export default class SettingsStore {
   }
 
   @computed get stateOptions() {
-    let options = {}
-    let countries = this.countries
+    const options = {}
+    const { countries } = this
 
-    for (let k in countries) {
-      let country = countries[k]
-      let cCode = country.code.toUpperCase()
+    for (const k in countries) {
+      const country = countries[k]
+      const cCode = country.code.toUpperCase()
 
       let c = options[cCode]
       if (!c) {
-        c = options[cCode] = {}
+        options[cCode] = {}
+        c = options[cCode]
       }
 
-      let subdivisions = country.subdivisions.slice().sort((a, b) => {
+      const subdivisions = country.subdivisions.slice().sort((a, b) => {
         if (a.name < b.name) { return -1 }
         if (a.name > b.name) { return 1 }
         return 0
       })
 
-      for (let k2 in subdivisions) {
-        let subdivision = subdivisions[k2]
+      for (const k2 in subdivisions) {
+        const subdivision = subdivisions[k2]
 
         c[subdivision.code.toUpperCase()] = subdivision.name
       }
