@@ -8,7 +8,6 @@ import {
 
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
-import PeopleIcon from '@material-ui/icons/PeopleOutlined'
 
 import { makeStyles } from '@material-ui/styles'
 
@@ -16,6 +15,9 @@ import { observer } from 'mobx-react'
 
 import React from 'react'
 
+import {
+  renderUICurrencyFromJSON,
+} from '../../../../src/currency'
 import { useStore } from '../../../../stores'
 import TimeSelect from './TimeSelect'
 
@@ -65,22 +67,32 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const TotalUsers = observer((props) => {
+export default observer((props) => {
   const classes = useStyles()
+
+  const {
+    cardProps,
+    compareValue,
+    displayValue,
+    disablePicker,
+    IconComponent,
+    previousValue,
+    queryField,
+    timeSelectValue,
+    title,
+    useCurrency,
+  } = props
 
   const {
     credentialStore,
     dashboardStore,
   } = useStore()
 
-  const {
-    weeklyUsers,
-    lastWeeklyUsers,
-  } = dashboardStore
+  const currency = credentialStore && credentialStore.org ? credentialStore.org.currency : ''
 
   return (
     <Card
-      {...props}
+      {...cardProps}
     >
       <CardContent>
         <Grid
@@ -94,23 +106,29 @@ const TotalUsers = observer((props) => {
               gutterBottom
               variant='body2'
             >
-              USERS
+              {title}
             </Typography>
-            <Typography variant='h4'>{ dashboardStore.totalUsers }</Typography>
+            <Typography variant='h4'>
+              {
+                useCurrency
+                  ? renderUICurrencyFromJSON(currency, displayValue)
+                  : displayValue
+              }
+            </Typography>
           </Grid>
           <Grid item>
-            { weeklyUsers >= lastWeeklyUsers
+            { displayValue >= previousValue
               ? <Avatar className={classes.successAvatar}>
-                  <PeopleIcon className={classes.icon} />
+                  <IconComponent className={classes.icon} />
                 </Avatar>
               : <Avatar className={classes.errorAvatar}>
-                  <PeopleIcon className={classes.icon} />
+                  <IconComponent className={classes.icon} />
                 </Avatar>
             }
           </Grid>
         </Grid>
         <div className={classes.difference}>
-          { weeklyUsers >= lastWeeklyUsers
+          { compareValue >= previousValue
             ? <>
               <ArrowUpwardIcon className={classes.successDifferenceIcon} />
               <Typography
@@ -118,8 +136,8 @@ const TotalUsers = observer((props) => {
                 variant='body2'
               >
                 {
-                  lastWeeklyUsers
-                    ? ((weeklyUsers / lastWeeklyUsers) * 100).toFixed(2)
+                  previousValue
+                    ? ((compareValue / previousValue) * 100).toFixed(2)
                     : 100
                 }%
               </Typography>
@@ -130,27 +148,32 @@ const TotalUsers = observer((props) => {
                 className={classes.errorDifferenceValue}
                 variant='body2'
               >
-                { (-100 + (weeklyUsers / lastWeeklyUsers) * 100).toFixed(2) }%
+                { (-100 + (compareValue / previousValue) * 100).toFixed(2) }%
               </Typography>
             </>
           }
-          <TimeSelect
-            inputLabel='Change Timeframe'
-            id='for-users'
-            value={dashboardStore.usersSelect}
-            disabled
-            onChange={(evt) => {
-              if (evt.target.value === 4) {
-                dashboardStore.setDate('users', evt.target.value, { date: credentialStore.org.createdAt, period: 'day' })
-              } else {
-                dashboardStore.setDate('users', evt.target.value)
-              }
-            }}
-          />
+          {
+            disablePicker
+              ? <Typography
+                  variant='body2'
+                >
+                  Current Period
+                </Typography>
+              : <TimeSelect
+                  inputLabel='Change Timeframe'
+                  id={`for-${title}`}
+                  value={timeSelectValue}
+                  onChange={(evt) => {
+                    if (evt.target.value === 4) {
+                      dashboardStore.setDate(queryField, evt.target.value, { date: credentialStore.org.createdAt, period: 'day' })
+                    } else {
+                      dashboardStore.setDate(queryField, evt.target.value)
+                    }
+                  }}
+                />
+          }
         </div>
       </CardContent>
     </Card>
   )
 })
-
-export default TotalUsers

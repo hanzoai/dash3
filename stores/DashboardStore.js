@@ -13,9 +13,9 @@ import moment from 'moment-timezone'
 export default class DashboardStore {
   @observable orgStart = null
 
-  @observable revSelect = 0
-  @observable revPeriod = 'week'
-  @observable revDate = moment().tz('America/Los_Angeles').endOf('day').subtract(1, 'week')
+  @observable revenueSelect = 0
+  @observable revenuePeriod = 'week'
+  @observable revenueDate = moment().tz('America/Los_Angeles').endOf('day').subtract(1, 'week')
   
   @observable chartSelect = 0
   @observable chartPeriod = 'week'
@@ -29,6 +29,24 @@ export default class DashboardStore {
   @observable usersSelect = 0
   @observable usersPeriod = 'week'
   @observable usersDate = moment().tz('America/Los_Angeles').endOf('day').subtract(1, 'week')
+
+  @observable projectedRevenue = 0
+  @observable lastProjectedRevenue = 0
+  @observable projectedRevenueSelect = 0
+  @observable projectedRevenuePeriod = 'week'
+  @observable projectedRevenueDate = moment().tz('America/Los_Angeles').endOf('day').subtract(1, 'week')
+  
+  @observable deposits = 0
+  @observable lastDeposits = 0
+  @observable depositsSelect = 0
+  @observable depositsPeriod = 'week'
+  @observable depositsDate = moment().tz('America/Los_Angeles').endOf('day').subtract(1, 'week')
+  
+  @observable refunds = 0
+  @observable lastRefunds = 0
+  @observable refundsSelect = 0
+  @observable refundsPeriod = 'week'
+  @observable refundsDate = moment().tz('America/Los_Angeles').endOf('day').subtract(1, 'week')
 
   @observable weeklyDates = []
 
@@ -130,7 +148,7 @@ export default class DashboardStore {
     this[`${field}Period`] = period
     this[`${field}Date`] = d
 
-    if (field === 'rev') {
+    if (field === 'revenue') {
       console.log('Refreshing revenue', d.format('MM-DD-YYYY'))
       this.chartSelect = val
       this.chartPeriod = period
@@ -149,6 +167,135 @@ export default class DashboardStore {
       this.getWeeklySalesPoints()
       this.getWeeklySales()
       this.getTotalSales()
+    } else if (field === 'projectedRevenue') {
+      console.log('Refreshing projected revenue chart', d.format('MM-DD-YYYY'))
+      this.getProjectedRevenue()
+      this.chartSelect = val
+      this.chartPeriod = period
+      this.chartDate = d
+      this.getWeeklyRevenuePoints()
+      this.getWeeklyRevenue()
+      this.getTotalRevenue()
+    } else if (field === 'deposits') {
+      console.log('Refreshing deposits chart', d.format('MM-DD-YYYY'))
+      this.getDeposits()
+    } else if (field === 'refunds') {
+      console.log('Refreshing refunds chart', d.format('MM-DD-YYYY'))
+      this.getRefunds()
+    }
+  }
+
+  @action async getProjectedRevenue() {
+    this.isLoading = true
+
+    const now = moment().tz('America/Los_Angeles').endOf('day')
+    const lastWeek = this.projectedRevenueDate
+
+    try {
+      const [projectedRevenue, lastProjectedRevenue] = await Promise.all([
+        this.api.client.counter.search({
+          tag: 'order.projected.revenue',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(now),
+          after: renderJSONDate(moment(now).subtract(1, this.projectedRevenuePeriod)),
+        }),
+        this.api.client.counter.search({
+          tag: 'order.projected.revenue',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(lastWeek),
+          after: renderJSONDate(moment(lastWeek).subtract(1, this.projectedRevenuePeriod)),
+        }),
+      ])
+
+      runInAction(() => {
+        this.projectedRevenue = projectedRevenue.count
+        this.lastProjectedRevenue = lastProjectedRevenue.count
+        this.isLoading = false
+      })
+    } catch (e) {
+      runInAction(() => {
+        this.isLoading = false
+      })
+
+      throw e
+    }
+  }
+
+  @action async getDeposits() {
+    this.isLoading = true
+
+    const now = moment().tz('America/Los_Angeles').endOf('day')
+    const lastWeek = this.depositsDate
+
+    try {
+      const [deposits, lastDeposits] = await Promise.all([
+        this.api.client.counter.search({
+          tag: 'order.revenue',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(now),
+          after: renderJSONDate(moment(now).subtract(1, this.depositsPeriod)),
+        }),
+        this.api.client.counter.search({
+          tag: 'order.revenue',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(lastWeek),
+          after: renderJSONDate(moment(lastWeek).subtract(1, this.depositsPeriod)),
+        }),
+      ])
+
+      runInAction(() => {
+        this.deposits = deposits.count
+        this.lastDeposits = lastDeposits.count
+        this.isLoading = false
+      })
+    } catch (e) {
+      runInAction(() => {
+        this.isLoading = false
+      })
+
+      throw e
+    }
+  }
+  
+  @action async getRefunds() {
+    this.isLoading = true
+
+    const now = moment().tz('America/Los_Angeles').endOf('day')
+    const lastWeek = this.refundsDate
+
+    try {
+      const [refunds, lastRefunds] = await Promise.all([
+        this.api.client.counter.search({
+          tag: 'order.refunded.amount',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(now),
+          after: renderJSONDate(moment(now).subtract(1, this.refundsPeriod)),
+        }),
+        this.api.client.counter.search({
+          tag: 'order.refunded.amount',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(lastWeek),
+          after: renderJSONDate(moment(lastWeek).subtract(1, this.refundsPeriod)),
+        }),
+      ])
+
+      runInAction(() => {
+        this.refunds = refunds.count
+        this.lastRefunds = lastRefunds.count
+        this.isLoading = false
+      })
+    } catch (e) {
+      runInAction(() => {
+        this.isLoading = false
+      })
+
+      throw e
     }
   }
 
@@ -268,8 +415,8 @@ export default class DashboardStore {
           tag: 'order.revenue',
           period: 'hourly',
           geo: '',
-          before: renderJSONDate(moment(n).subtract(1, this.revPeriod)),
-          after: renderJSONDate(moment(n).subtract(1, this.revPeriod).subtract(1, 'day')),
+          before: renderJSONDate(moment(n).subtract(1, this.revenuePeriod)),
+          after: renderJSONDate(moment(n).subtract(1, this.revenuePeriod).subtract(1, 'day')),
         })
       ))
 
@@ -288,8 +435,8 @@ export default class DashboardStore {
           tag: 'order.refunded.amount',
           period: 'hourly',
           geo: '',
-          before: renderJSONDate(moment(n).subtract(1, this.revPeriod)),
-          after: renderJSONDate(moment(n).subtract(1, this.revPeriod).subtract(1, 'day')),
+          before: renderJSONDate(moment(n).subtract(1, this.revenuePeriod)),
+          after: renderJSONDate(moment(n).subtract(1, this.revenuePeriod).subtract(1, 'day')),
         })
       ))
 
@@ -387,7 +534,7 @@ export default class DashboardStore {
     this.isLoading = true
 
     const now = moment().tz('America/Los_Angeles').endOf('day')
-    const lastWeek = this.revDate
+    const lastWeek = this.revenueDate
 
     try {
       const [weeklyRevenue, lastWeeklyRevenue, weeklyRefundedAmount, lastWeeklyRefundedAmount] = await Promise.all([
@@ -396,28 +543,28 @@ export default class DashboardStore {
           period: 'hourly',
           geo: '',
           before: renderJSONDate(now),
-          after: renderJSONDate(moment(now).subtract(1, this.revPeriod)),
+          after: renderJSONDate(moment(now).subtract(1, this.revenuePeriod)),
         }),
         this.api.client.counter.search({
           tag: 'order.revenue',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(lastWeek),
-          after: renderJSONDate(moment(lastWeek).subtract(1, this.revPeriod)),
+          after: renderJSONDate(moment(lastWeek).subtract(1, this.revenuePeriod)),
         }),
         this.api.client.counter.search({
           tag: 'order.refunded.amount',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(now),
-          after: renderJSONDate(moment(now).subtract(1, this.revPeriod)),
+          after: renderJSONDate(moment(now).subtract(1, this.revenuePeriod)),
         }),
         this.api.client.counter.search({
           tag: 'order.refunded.amount',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(lastWeek),
-          after: renderJSONDate(moment(lastWeek).subtract(1, this.revPeriod)),
+          after: renderJSONDate(moment(lastWeek).subtract(1, this.revenuePeriod)),
         }),
       ])
 
@@ -506,8 +653,6 @@ export default class DashboardStore {
         }),
       ])
 
-      console.log('sales', res, res2)
-
       runInAction(() => {
         this.totalSales = res.count
         this.totalRefunded = res2.count
@@ -534,14 +679,14 @@ export default class DashboardStore {
           period: 'hourly',
           geo: '',
           before: renderJSONDate(now),
-          after: renderJSONDate(this.revDate),
+          after: renderJSONDate(this.revenueDate),
         }),
         this.api.client.counter.search({
           tag: 'order.refunded.amount',
           period: 'hourly',
           geo: '',
-          before: renderJSONDate(now.subtract(1, this.revPeriod)),
-          after: renderJSONDate(this.revDate.subtract(1, this.revPeriod)),
+          before: renderJSONDate(now.subtract(1, this.revenuePeriod)),
+          after: renderJSONDate(this.revenueDate.subtract(1, this.revenuePeriod)),
         }),
       ])
 
