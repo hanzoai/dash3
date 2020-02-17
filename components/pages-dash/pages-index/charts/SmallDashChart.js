@@ -6,6 +6,8 @@ import {
   Typography,
 } from '@material-ui/core'
 
+import moment from 'moment-timezone'
+
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
 
@@ -164,8 +166,14 @@ export default observer((props) => {
                   id={`for-${title}`}
                   value={timeSelectValue}
                   onChange={(evt) => {
-                    if (evt.target.value === 4) {
-                      dashboardStore.setDate(queryField, evt.target.value, { date: credentialStore.org.createdAt, period: 'day' })
+                    if (evt.target.value === 'alltime') {
+                      dashboardStore.setDate(queryField, evt.target.value, {
+                        date: credentialStore.org.createdAt,
+                        period: {
+                          interval: 'day',
+                          amount: moment().diff(moment(credentialStore.org.createdAt), 'days'),
+                        },
+                      })
                     } else {
                       dashboardStore.setDate(queryField, evt.target.value)
                     }

@@ -30,9 +30,9 @@ const Dashboard = observer(() => {
     dashboardStore.getWeeklyRevenue()
     dashboardStore.getWeeklyUsers()
 
-    dashboardStore.getTotalSales()
-    dashboardStore.getTotalRevenue()
-    dashboardStore.getTotalUsers()
+    // dashboardStore.getTotalSales()
+    // dashboardStore.getTotalRevenue()
+    // dashboardStore.getTotalUsers()
 
     dashboardStore.getProducts()
 

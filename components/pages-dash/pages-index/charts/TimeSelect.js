@@ -31,11 +31,11 @@ export default (props) => {
         onChange={onChange}
         disabled={disabled}
       >
-        <MenuItem value={0}>Last 7 Days</MenuItem>
-        <MenuItem value={1}>Last Day</MenuItem>
-        <MenuItem value={2}>This Month</MenuItem>
-        <MenuItem value={3}>Last 30 Days</MenuItem>
-        <MenuItem value={4}>All Time</MenuItem>
+        <MenuItem value='day'>Last Day</MenuItem>
+        <MenuItem value='7days'>Last 7 Days</MenuItem>
+        <MenuItem value='month'>This Month</MenuItem>
+        <MenuItem value='30days'>Last 30 Days</MenuItem>
+        <MenuItem value='alltime'>All Time</MenuItem>
       </Select>
     </FormControl>
   )
