@@ -3,20 +3,16 @@ import {
   Card,
   CardContent,
   Grid,
+  Hidden,
   Typography,
 } from '@material-ui/core'
-
-import moment from 'moment-timezone'
-
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
-
 import { makeStyles } from '@material-ui/styles'
-
 import { observer } from 'mobx-react'
-
+import moment from 'moment-timezone'
+import numeral from 'numeral'
 import React from 'react'
-
 import {
   renderUICurrencyFromJSON,
 } from '../../../../src/currency'
@@ -110,13 +106,24 @@ export default observer((props) => {
             >
               {title}
             </Typography>
-            <Typography variant='h4'>
-              {
-                useCurrency
-                  ? renderUICurrencyFromJSON(currency, displayValue)
-                  : displayValue
-              }
-            </Typography>
+            <Hidden smDown>
+              <Typography variant='h4'>
+                {
+                  useCurrency
+                    ? numeral(renderUICurrencyFromJSON(currency, displayValue)).format('$0,0.00')
+                    : numeral(displayValue).format('0,0')
+                }
+              </Typography>
+            </Hidden>
+            <Hidden mdUp>
+              <Typography variant='h6'>
+                {
+                  useCurrency
+                    ? numeral(renderUICurrencyFromJSON(currency, displayValue)).format('$0,0.00')
+                    : numeral(displayValue).format('0,0')
+                }
+              </Typography>
+            </Hidden>
           </Grid>
           <Grid item>
             { displayValue >= previousValue
