@@ -49,20 +49,14 @@ const TotalSales = observer((props) => {
   const {
     chartDates,
     weeklyRevenuePoints,
-    lastWeeklyRevenuePoints,
     chartPeriod,
   } = dashboardStore
 
   const data = {
     labels: chartDates.slice().map((d) => d.format('D MMM')),
     datasets: [
-      // {
-      //   label: `Last ${chartPeriod}`,
-      //   backgroundColor: indigo[500],
-      //   data: lastWeeklyRevenuePoints.slice(),
-      // },
       {
-        label: `This ${chartPeriod}`,
+        label: `This ${chartPeriod.interval}`,
         backgroundColor: blue[500],
         data: weeklyRevenuePoints.slice(),
       },
@@ -75,7 +69,7 @@ const TotalSales = observer((props) => {
       className={classes.root}
     >
       <CardHeader
-        title='Sales by Day'
+        title='Projected Revenue per Day'
       />
       <Divider />
       <CardContent>

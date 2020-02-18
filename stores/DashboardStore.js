@@ -472,7 +472,7 @@ export default class DashboardStore {
     try {
       const psWeekly = this.chartDates.map((n) => {
         return this.api.client.counter.search({
-          tag: 'order.revenue',
+          tag: 'order.projected.revenue',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(n),
@@ -482,7 +482,7 @@ export default class DashboardStore {
 
       const psLastWeekly = this.chartDates.map((n) => (
         this.api.client.counter.search({
-          tag: 'order.revenue',
+          tag: 'order.projected.revenue',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(moment(n).subtract(amount, interval)),

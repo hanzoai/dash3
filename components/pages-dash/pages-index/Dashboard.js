@@ -3,7 +3,6 @@ import {
 } from '@material-ui/core'
 import {
   PaymentOutlined,
-  PeopleOutlined,
   ShoppingCartOutlined,
 } from '@material-ui/icons'
 import { observer } from 'mobx-react'

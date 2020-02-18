@@ -6,6 +6,7 @@
 import {
   renderUICurrencyFromJSON,
 } from '../../../../src/currency'
+import numeral from 'numeral'
 
 // export const data = {
 //   labels: ['1 Aug', '2 Aug', '3 Aug', '4 Aug', '5 Aug', '6 Aug'],
@@ -43,7 +44,7 @@ export default (currency) => ({
       label: (tooltipItem, data) => {
         const label = data.datasets[tooltipItem.datasetIndex].label || ''
 
-        return `${label}: ${renderUICurrencyFromJSON(currency, tooltipItem.yLabel)}`
+        return `${label}: ${numeral(renderUICurrencyFromJSON(currency, tooltipItem.yLabel)).format('$0,0.00')}`
       },
     },
   },
@@ -72,7 +73,7 @@ export default (currency) => ({
           fontColor: '#333',
           beginAtZero: true,
           min: 0,
-          userCallback: (value) => renderUICurrencyFromJSON(currency, value),
+          userCallback: (value) => numeral(renderUICurrencyFromJSON(currency, value)).format('$0,0.00'),
         },
         gridLines: {
           borderDash: [2],
