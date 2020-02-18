@@ -110,7 +110,7 @@ export default observer((props) => {
               <Typography variant='h4'>
                 {
                   useCurrency
-                    ? numeral(renderUICurrencyFromJSON(currency, displayValue)).format('$0,0.00')
+                    ? numeral(renderUICurrencyFromJSON(currency, displayValue)).format('$0,0.00a')
                     : numeral(displayValue).format('0,0')
                 }
               </Typography>
@@ -119,7 +119,7 @@ export default observer((props) => {
               <Typography variant='h6'>
                 {
                   useCurrency
-                    ? numeral(renderUICurrencyFromJSON(currency, displayValue)).format('$0,0.00')
+                    ? numeral(renderUICurrencyFromJSON(currency, displayValue)).format('$0,0.00a')
                     : numeral(displayValue).format('0,0')
                 }
               </Typography>

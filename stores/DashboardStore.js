@@ -458,13 +458,13 @@ export default class DashboardStore {
   @action async getWeeklyRevenuePoints() {
     this.isLoading = true
 
-    let now = moment().tz('America/Los_Angeles').endOf('day').subtract(1, 'day')
+    let now = moment().tz('America/Los_Angeles').endOf('day')
     const chartDates = []
     while (now.isAfter(this.chartDate)) {
       chartDates.unshift(moment(now))
       now = now.subtract(1, 'day')
     }
-    chartDates.unshift(moment(now).subtract(1, 'day'))
+    // chartDates.unshift(moment(now).subtract(1, 'day'))
     this.chartDates = chartDates
 
     const { amount, interval } = this.revenuePeriod
