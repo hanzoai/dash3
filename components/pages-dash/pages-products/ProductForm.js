@@ -57,7 +57,8 @@ const ProductForm = observer((props) => {
     sku: [],
     description: [],
     price: [isRequired],
-    listPrice: [isRequired],
+    listPrice: [],
+    projectedPrice: [],
     preorder: [],
     taxable: [],
   }, {
@@ -72,6 +73,7 @@ const ProductForm = observer((props) => {
     run,
     setPrice,
     setListPrice,
+    setProjectedPrice,
   } = ms
 
   const submit = async () => {
@@ -194,7 +196,7 @@ const ProductForm = observer((props) => {
                   setValue={hooks.description[1]}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
                 <MUIText
                   label='Display Price'
                   variant='outlined'
@@ -211,9 +213,9 @@ const ProductForm = observer((props) => {
                   error={errors.price}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
                 <MUIText
-                  label='Non-Discount Price (optional)'
+                  label='MSRP (optional)'
                   variant='outlined'
                   disabled={disabled}
                   InputProps={{
@@ -228,7 +230,24 @@ const ProductForm = observer((props) => {
                   error={errors.listPrice}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
+                <MUIText
+                  label='Projected Price (optional)'
+                  variant='outlined'
+                  disabled={disabled}
+                  InputProps={{
+                    inputComponent: CreateCurrencyFormat(currency),
+                    endAdornment: <InputAdornment position='end'>{ currency ? currency.toUpperCase() : 'USD'}</InputAdornment>,
+                  }}
+                  defaultValue={renderNumericCurrencyFromJSON(currency, dst.projectedPrice) || 0}
+                  setValue={(v) => {
+                    const value = renderJSONCurrencyFromUI(currency, v)
+                    setProjectedPrice(value)
+                  }}
+                  error={errors.listPrice}
+                />
+              </Grid>
+              <Grid item xs={4}>
                 <MUISwitch
                   label='Preorder'
                   variant='outlined'
@@ -238,7 +257,7 @@ const ProductForm = observer((props) => {
                   error={errors.preorder}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
                 <MUISwitch
                   label='Taxable'
                   variant='outlined'

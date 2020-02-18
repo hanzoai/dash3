@@ -17,9 +17,9 @@ export default (PageComponent) => (props) => {
     if (!credentialStore.org) {
       credentialStore.getOrg()
         .then(() => {
-          console.log('still logged in')
+          // console.log('still logged in')
         }).catch((e) => {
-          console.log('not logged in, logging out')
+          // console.log('not logged in, logging out')
 
           credentialStore.logout()
           Router.push('/')

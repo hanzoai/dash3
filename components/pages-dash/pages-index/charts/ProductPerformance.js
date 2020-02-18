@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import Router from 'next/router'
 
 import React from 'react'
-
+import numeral from 'numeral'
 import {
   renderUICurrencyFromJSON,
 } from '../../../../src/currency'
@@ -22,20 +22,20 @@ const columns = [
   {
     title: 'Revenue',
     field: 'revenue',
-    render: (row) => renderUICurrencyFromJSON(
+    render: (row) => numeral(renderUICurrencyFromJSON(
       row.currency,
       row.revenue - row.refunded * row.price,
-    ),
+    )).format('$0,0.00'),
   },
   {
     title: 'Sold',
     field: 'sold',
-    render: (row) => row.sold,
+    render: (row) => numeral(row.sold).format('0,0'),
   },
   {
     title: 'Refunded',
     field: 'refunded',
-    render: (row) => row.refunded,
+    render: (row) => numeral(row.refunded).format('0,0'),
   },
 ]
 

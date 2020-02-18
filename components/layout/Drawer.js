@@ -46,8 +46,6 @@ export default observer(() => {
   const classes = useStyles()
   const { credentialStore } = useStore()
 
-  console.log('logged in', credentialStore.isLoggedIn)
-
   if (!credentialStore.isLoggedIn) {
     return null
   }

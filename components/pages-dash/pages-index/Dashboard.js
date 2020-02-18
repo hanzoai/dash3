@@ -1,20 +1,18 @@
 import {
   Grid,
 } from '@material-ui/core'
-
+import {
+  PaymentOutlined,
+  ShoppingCartOutlined,
+} from '@material-ui/icons'
 import { observer } from 'mobx-react'
-
-import React, { useEffect } from 'react'
-
+import { useEffect } from 'react'
 import { useStore } from '../../../stores'
 
 import {
-  DailyRevenue,
   ProductPerformance,
   SalesChart,
-  TotalRevenue,
-  TotalSales,
-  TotalUsers,
+  SmallDashChart,
 } from './charts'
 
 const Dashboard = observer(() => {
@@ -31,12 +29,31 @@ const Dashboard = observer(() => {
     dashboardStore.getWeeklyRevenue()
     dashboardStore.getWeeklyUsers()
 
-    dashboardStore.getTotalSales()
-    dashboardStore.getTotalRevenue()
-    dashboardStore.getTotalUsers()
+    // dashboardStore.getTotalSales()
+    // dashboardStore.getTotalRevenue()
+    // dashboardStore.getTotalUsers()
 
     dashboardStore.getProducts()
+
+    dashboardStore.getProjectedRevenue()
+    dashboardStore.getDeposits()
+    dashboardStore.getRefunds()
   }, [])
+
+  const {
+    deposits,
+    refunds,
+    weeklySales,
+    lastDeposits,
+    lastWeeklySales,
+    lastRefunds,
+    projectedRevenue,
+    lastProjectedRevenue,
+    depositsSelect,
+    refundsSelect,
+    salesSelect,
+    projectedRevenueSelect,
+  } = dashboardStore
 
   return (
     <Grid container justify='center' alignItems='flex-start' spacing={2}>
@@ -47,7 +64,17 @@ const Dashboard = observer(() => {
         xl={3}
         xs={12}
       >
-        <TotalRevenue />
+        <SmallDashChart
+          cardProps={{}}
+          displayValue={projectedRevenue}
+          title='Projected Revenue'
+          queryField='projectedRevenue'
+          IconComponent={PaymentOutlined}
+          useCurrency
+          compareValue={projectedRevenue}
+          previousValue={lastProjectedRevenue}
+          timeSelectValue={projectedRevenueSelect}
+        />
       </Grid>
       <Grid
         item
@@ -56,7 +83,15 @@ const Dashboard = observer(() => {
         xl={3}
         xs={12}
       >
-        <TotalSales />
+        <SmallDashChart
+          displayValue={weeklySales}
+          title='Preorders'
+          queryField='sales'
+          IconComponent={ShoppingCartOutlined}
+          compareValue={weeklySales}
+          previousValue={lastWeeklySales}
+          timeSelectValue={salesSelect}
+        />
       </Grid>
       <Grid
         item
@@ -65,7 +100,16 @@ const Dashboard = observer(() => {
         xl={3}
         xs={12}
       >
-        <TotalUsers />
+        <SmallDashChart
+          displayValue={deposits}
+          title='Deposits'
+          queryField='deposits'
+          useCurrency
+          IconComponent={PaymentOutlined}
+          compareValue={deposits}
+          previousValue={lastDeposits}
+          timeSelectValue={depositsSelect}
+        />
       </Grid>
       <Grid
         item
@@ -74,7 +118,16 @@ const Dashboard = observer(() => {
         xl={3}
         xs={12}
       >
-        <DailyRevenue />
+        <SmallDashChart
+          displayValue={refunds}
+          title='Refunds'
+          queryField='refunds'
+          IconComponent={PaymentOutlined}
+          useCurrency
+          compareValue={refunds}
+          previousValue={lastRefunds}
+          timeSelectValue={refundsSelect}
+        />
       </Grid>
       <Grid item xs={12}>
         <SalesChart />

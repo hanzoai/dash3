@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     padding: 0,
     paddingLeft: theme.spacing(2),
+    justifyContent: 'space-between',
   },
   logoImg: {
     maxHeight: 36,
