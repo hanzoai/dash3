@@ -171,6 +171,7 @@ const ProductsTable = observer(() => {
 
   const onEnter = (ev) => {
     if (ev.key === 'Enter') {
+      hooks.q[1](ev.target.value)
       search()
       ev.preventDefault()
     }
@@ -193,7 +194,7 @@ const ProductsTable = observer(() => {
               disabled={disabled}
               shrink
               value={dst.q}
-              setValue={hooks.q[1]}
+              inputValue={hooks.q[1]}
               onKeyPress={onEnter}
               InputProps={SearchInputProps}
             />

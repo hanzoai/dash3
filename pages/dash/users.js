@@ -4,7 +4,7 @@ import React from 'react'
 import { IsLoggedIn } from '../../components/pages'
 import { UsersSearch } from '../../components/pages-dash'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   main: {
     paddingLeft: 200,
     paddingTop: 80,
