@@ -11,7 +11,7 @@ import {
 import {
   assignPath,
   getPath,
-  renderUIDate,
+  renderDate,
 } from '@hanzo/utils'
 
 import {
@@ -22,19 +22,79 @@ import {
   Typography,
 } from '@material-ui/core'
 
-import { observer } from 'mobx-react'
+import {
+  makeStyles,
+} from '@material-ui/core/styles'
 
+import { observer } from 'mobx-react'
+import moment from 'moment-timezone'
 import Router from 'next/router'
 
 import React, { useState } from 'react'
 
+import {
+  renderUICurrencyFromJSON,
+} from '../../../src/currency'
 import { useMidstream } from '../../../src/hooks'
 import { useStore } from '../../../stores'
+import { MUITable } from '../../tables'
+import searchStyle from '../searchStyle'
+
+const useStyles = makeStyles((theme) => (
+  Object.assign(searchStyle(theme), {
+    right: {
+      textAlign: 'right',
+    },
+  })
+))
+
+const columns = [
+  {
+    title: 'Number',
+    field: 'number',
+  },
+  {
+    title: 'Total',
+    field: 'price',
+    render: (row) => renderUICurrencyFromJSON(row.currency, row.total),
+  },
+  {
+    title: 'Order Status',
+    field: 'status',
+  },
+  {
+    title: 'Payment Status',
+    field: 'paymentStatus',
+  },
+  {
+    title: 'State',
+    field: 'shippingAddressState',
+    render: (row) => row.shippingAddress.state,
+  },
+  {
+    title: 'Country',
+    field: 'shippingAddressCountry',
+    render: (row) => row.shippingAddress.country,
+  },
+  {
+    title: 'Created',
+    field: 'createdAt',
+    render: (row) => renderDate(row.createdAt),
+  },
+  {
+    title: 'Updated',
+    field: 'updatedAt',
+    render: (row) => moment(row.createdAt).fromNow(),
+  },
+]
 
 const UserForm = observer((props) => {
+  const classes = useStyles()
+
   const {
     settingsStore,
     usersStore,
+    ordersStore,
   } = useStore()
 
   const { doCreate } = props
@@ -71,7 +131,33 @@ const UserForm = observer((props) => {
 
   const { user } = usersStore
 
-  const { hooks, errors, run } = ms
+  const opts = {
+    search: false,
+    pageSize: user && user.orders && user.orders.length,
+    pageSizeOptions: false,
+  }
+
+  const {
+    hooks,
+    errors,
+    run,
+  } = ms
+
+  const onRowClick = (event, rowData) => {
+    setError(false)
+    setIsLoading(true)
+
+    try {
+      ordersStore.orderId = rowData.id
+      ordersStore.order = rowData
+
+      Router.push(`/dash/order?id=${rowData.id}`)
+    } catch (e) {
+      setError(e.message || e)
+    }
+
+    setIsLoading(false)
+  }
 
   const submit = async () => {
     setError(false)
@@ -114,7 +200,7 @@ const UserForm = observer((props) => {
                     Created At
                   </Typography>
                   <Typography variant='body2'>
-                    { renderUIDate(user.createdAt) }
+                    { renderDate(user.createdAt) }
                   </Typography>
                 </Grid>
                 <Grid item xs={4}>
@@ -122,7 +208,7 @@ const UserForm = observer((props) => {
                     Updated At
                   </Typography>
                   <Typography variant='body2'>
-                    { renderUIDate(user.updatedAt) }
+                    { renderDate(user.updatedAt) }
                   </Typography>
                 </Grid>
               </Grid>
@@ -270,6 +356,21 @@ const UserForm = observer((props) => {
         </Card>
       </Grid>
       <Grid item xs={6}/>
+      <Grid item xs={12}>
+        { !doCreate && user.orders && user.orders.length
+          && <div className={classes.table}>
+              <MUITable
+                columns={columns}
+                options={opts}
+                isLoading={usersStore.isLoading}
+                initialPage={0}
+                data={user.orders}
+                title='Orders'
+                onRowClick={onRowClick}
+              />
+            </div>
+        }
+      </Grid>
     </Grid>
   )
 })

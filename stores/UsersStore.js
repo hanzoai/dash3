@@ -40,7 +40,10 @@ export default class UsersStore {
     this.userId = id || this.userId
 
     try {
-      const res = await this.api.client.user.get(this.userId)
+      const [res, ordersRes] = await Promise.all([
+        this.api.client.user.get(this.userId),
+        this.api.client.user.orders(this.userId),
+      ])
 
       runInAction(() => {
         this.user = Object.assign(this.user, res)
@@ -48,6 +51,10 @@ export default class UsersStore {
         if (this.user.kyc && this.user.kyc.gender) {
           this.user.kyc.gender = this.user.kyc.gender.toLowerCase()
         }
+        this.user.orders = ordersRes
+
+        console.log('user', this.user)
+
         this.isLoading = false
       })
 

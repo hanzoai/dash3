@@ -301,8 +301,8 @@ const OrderForm = observer((props) => {
                     variant='outlined'
                     disabled={disabled}
                     value={getPath(order, 'shippingAddress.line2')}
-                    error={errors['shippingAddress.line1']}
-                    setValue={hooks['shippingAddress.line1'][1]}
+                    error={errors['shippingAddress.line2']}
+                    setValue={hooks['shippingAddress.line2'][1]}
                   />
                 </Grid>
                 <Grid item xs={8}>
