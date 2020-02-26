@@ -25,6 +25,7 @@ const styles = () => ({
     width: '100vw',
     height: 'calc(100vh - 80px)',
     '& > *': {
+      width: '100%',
       margin: '0px',
       padding: '8px',
     },

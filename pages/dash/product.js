@@ -11,6 +11,7 @@ const styles = () => ({
     paddingTop: '80px',
     width: '100vw',
     '& > *': {
+      width: '100%',
       margin: '0px',
       padding: '8px',
     },

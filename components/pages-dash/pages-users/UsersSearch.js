@@ -186,11 +186,11 @@ const UsersTable = observer(() => {
 
   const onEnter = (ev) => {
     if (ev.key === 'Enter') {
+      hooks.q[1](ev.target.value)
       search()
       ev.preventDefault()
     }
   }
-
 
   return (
     <div>

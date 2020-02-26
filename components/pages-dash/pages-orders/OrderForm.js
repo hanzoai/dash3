@@ -28,6 +28,10 @@ import {
 } from '@material-ui/core'
 
 import {
+  red,
+} from '@material-ui/core/colors'
+
+import {
   makeStyles,
 } from '@material-ui/core/styles'
 
@@ -49,6 +53,7 @@ import {
 import { useMidstream } from '../../../src/hooks'
 import { useStore } from '../../../stores'
 import { CreateCurrencyFormat } from '../../controls'
+import Link from '../../link'
 import { MUITable } from '../../tables'
 import searchStyle from '../searchStyle'
 
@@ -56,6 +61,9 @@ const useStyles = makeStyles((theme) => (
   Object.assign(searchStyle(theme), {
     right: {
       textAlign: 'right',
+    },
+    refundText: {
+      color: red[500],
     },
   })
 ))
@@ -257,6 +265,28 @@ const OrderForm = observer((props) => {
           }
         </Grid>
         <Grid item xs={6}>
+          <Card>
+            <CardContent>
+              <Grid container justify='center' alignItems='flex-start' spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant='h6'>
+                    User Information
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant='body1'>
+                    User ID
+                  </Typography>
+                  <Typography variant='body2'>
+                    <Link href={`/dash/user?id=${order.userId}`} color='secondary'>
+                      { order.userId }
+                    </Link>
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+          <br />
           <Card>
             <CardContent>
               <Grid container justify='center' alignItems='flex-start' spacing={2}>
@@ -478,23 +508,37 @@ const OrderForm = observer((props) => {
                       <Typography variant='body2'>
                         <strong>Discount</strong>
                       </Typography>
-                      <br />
                     </Grid>
                     <Grid item xs={6} className={classes.right}>
                       <Typography variant='body2'>
                         { renderUICurrencyFromJSON(order.currency, order.discount) }
                       </Typography>
-                      <br />
                     </Grid>
+                    { order.refunded
+                      && <>
+                        <Grid item xs={6}>
+                          <Typography variant='body2' className={classes.refundText}>
+                            <strong>Refunded</strong>
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} className={classes.right}>
+                          <Typography variant='body2' className={classes.refundText}>
+                            { renderUICurrencyFromJSON(order.currency, order.refunded) }
+                          </Typography>
+                        </Grid>
+                      </>
+                    }
                     <Grid item xs={6}>
+                      <br />
                       <Typography variant='body2'>
                         <strong>Total</strong>
                       </Typography>
                       <br />
                     </Grid>
                     <Grid item xs={6} className={classes.right}>
+                      <br />
                       <Typography variant='body2'>
-                        { renderUICurrencyFromJSON(order.currency, order.total) }
+                        { renderUICurrencyFromJSON(order.currency, order.total - order.refunded) }
                       </Typography>
                       <br />
                     </Grid>
