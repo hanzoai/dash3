@@ -183,10 +183,22 @@ export default class ProductsStore {
       }))
     }
 
+    const ps2 = []
+    for (const product of this.products) {
+      ps2.push(this.api.client.counter.search({
+        tag: `product.${product.id}.refunded.count`,
+        period: 'total',
+        geo: '',
+      }))
+    }
+
     try {
       const res = await Promise.all(ps)
+      const res2 = await Promise.all(ps2)
+
       for (const k in this.products) {
         this.products[k].sold = res[k].count
+        this.products[k].refundedAmount = res2[k].count
       }
     } catch (e) {
       console.log('counter error', e)

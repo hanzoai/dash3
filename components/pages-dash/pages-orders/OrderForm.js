@@ -151,7 +151,7 @@ const OrderForm = observer((props) => {
     ],
     'shippingAddress.country': [isRequired],
   }, {
-    order: assignPath(order),
+    dst: assignPath(order),
     errors: ordersStore.errors,
   })
 
@@ -185,7 +185,6 @@ const OrderForm = observer((props) => {
       const o = await (doCreate ? ordersStore.createOrder() : ordersStore.updateOrder())
       Router.push(`/dash/order?id=${o.id}`)
     } catch (e) {
-      console.log('order update error', e)
       setError(e.message || e)
     }
 
@@ -514,7 +513,7 @@ const OrderForm = observer((props) => {
                         { renderUICurrencyFromJSON(order.currency, order.discount) }
                       </Typography>
                     </Grid>
-                    { order.refunded
+                    { order.refunded > 0
                       && <>
                         <Grid item xs={6}>
                           <Typography variant='body2' className={classes.refundText}>

@@ -60,8 +60,13 @@ const columns = [
   {
     title: 'Sold',
     field: 'name',
-    render: (row) => row.sold,
+    render: (row) => row.sold - row.refundedAmount,
   },
+  // {
+  //   title: 'Refunded',
+  //   field: 'name',
+  //   render: (row) =>
+  // },
   {
     title: 'Created',
     field: 'createdAt',
