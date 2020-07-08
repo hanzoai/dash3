@@ -564,7 +564,7 @@ const OrderForm = observer((props) => {
       </Grid>
 
       <Dialog open={refundOpen} onClose={closeRefund} aria-labelledby='form-dialog-title'>
-        <DialogTitle id='form-dialog-title'>Subscribe</DialogTitle>
+        <DialogTitle id='form-dialog-title'>Refund</DialogTitle>
         <DialogContent>
           { refundSuccess
             ? <>
