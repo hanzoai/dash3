@@ -33,6 +33,7 @@ export const useMidstream = (config, opts) => {
     })
   })
 
+
   const ret = { ...ms }
 
   return Object.assign(ret, {
