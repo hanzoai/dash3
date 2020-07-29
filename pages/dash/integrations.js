@@ -60,34 +60,6 @@ class Integrations extends Component {
 
     return (
       <main className={classes.integrations}>
-        <Grid container justify='center' alignItems='center'>
-          <Grid item xs={3}>
-            <Card>
-              <CardContent>
-                <Typography variant='h5'>
-                  Stripe
-                </Typography>
-                <Typography variant='body1'>
-                  Connect to Stripe to enable the payment system.
-                </Typography>
-                <CardActions>
-                  <Button
-                    href={stripeConnect}
-                    fullWidth
-                    size='large'
-                    variant='contained'
-                    color={credentialStore.hasIntegration('stripe') ? 'secondary' : 'primary'}
-                    type='submit'
-                    disabled={disabled}
-                    startIcon={credentialStore.hasIntegration('stripe') ? <CheckIcon /> : undefined}
-                  >
-                    {credentialStore.hasIntegration('stripe') ? 'Connected' : 'Connect'}
-                  </Button>
-                </CardActions>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
       </main>
     )
   }

@@ -69,21 +69,17 @@ const useStyles = makeStyles((theme) => (
 ))
 
 const columns = [
-  {
-    title: 'External Id',
-    field: 'id',
-    render: (row) => {
-      if (row.type === 'stripe') {
-        return row.account.chargeId || 'N/A'
-      }
+  // {
+  //   title: 'External Id',
+  //   field: 'id',
+  //   render: (row) => {
+  //     if (row.type === 'stripe') {
+  //       return row.account.chargeId || 'N/A'
+  //     }
 
-      return 'N/A'
-    },
-  },
-  {
-    title: 'Type',
-    field: 'type',
-  },
+  //     return 'N/A'
+  //   },
+  // },
   {
     title: 'Last 4',
     render: (row) => row.account.lastFour,
@@ -168,9 +164,9 @@ const OrderForm = observer((props) => {
 
   const onRowClick = (event, rowData) => {
     try {
-      if (rowData.type === 'stripe') {
-        window.open(`//dashboard.stripe.com/payments/${rowData.account.chargeId}`, '_blank')
-      }
+      // if (rowData.type === 'stripe') {
+      //   window.open(`//dashboard.stripe.com/payments/${rowData.account.chargeId}`, '_blank')
+      // }
     } catch (e) {
       setError(e.message || e)
     }

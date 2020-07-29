@@ -101,18 +101,6 @@ export default observer(() => {
             </Link>
           </ListItemText>
         </ListItem>
-        <ListItem>
-          <ListItemIcon className={classes.listIcon}>
-            <Link className={classes.colums} href='/dash/integrations' color='textPrimary' underline='none'>
-              <AppsIcon />
-            </Link>
-          </ListItemIcon>
-          <ListItemText>
-            <Link href='/dash/integrations' color='textPrimary' underline='none'>
-              Integrations
-            </Link>
-          </ListItemText>
-        </ListItem>
       </List>
     </Drawer>
   )
