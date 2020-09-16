@@ -31,12 +31,12 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 700,
   },
   successAvatar: {
-    backgroundColor: theme.palette.success.main,
+    backgroundColor: '#4caf50',
     height: 56,
     width: 56,
   },
   errorAvatar: {
-    backgroundColor: theme.palette.error.main,
+    backgroundColor: '#f44336',
     height: 56,
     width: 56,
   },

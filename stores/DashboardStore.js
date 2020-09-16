@@ -490,6 +490,26 @@ export default class DashboardStore {
         })
       ))
 
+      const psProjectedRefundedWeekly = this.chartDates.map((n) => {
+        return this.api.client.counter.search({
+          tag: 'order.projected.revenue',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(n),
+          after: renderJSONDate(moment(n).subtract(1, 'day')),
+        })
+      })
+
+      const psProjectedRefundedLastWeekly = this.chartDates.map((n) => (
+        this.api.client.counter.search({
+          tag: 'order.projected.revenue',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(moment(n).subtract(amount, interval)),
+          after: renderJSONDate(moment(n).subtract(amount, interval).subtract(1, 'day')),
+        })
+      ))
+
       const psWeeklyRefunded = this.chartDates.map((n) => (
         this.api.client.counter.search({
           tag: 'order.refunded.amount',
@@ -512,12 +532,14 @@ export default class DashboardStore {
 
       const weeklyRevenuePoints = await Promise.all(psWeekly)
       const lastWeeklyRevenuePoints = await Promise.all(psLastWeekly)
+      const weeklyRefundedRevenuePoints = await Promise.all(psProjectedRefundedWeekly)
+      const lastWeeklyRefundedRevenuePoints = await Promise.all(psProjectedRefundedLastWeekly)
       const weeklyRefundedAmountPoints = await Promise.all(psWeeklyRefunded)
       const lastWeeklyRefundedAmountPoints = await Promise.all(psLastWeeklyRefunded)
 
       runInAction(() => {
-        this.weeklyRevenuePoints = weeklyRevenuePoints.map((p) => p.count)
-        this.lastWeeklyRevenuePoints = lastWeeklyRevenuePoints.map((p) => p.count)
+        this.weeklyRevenuePoints = weeklyRevenuePoints.map((p) => p.count) - weeklyRefundedRevenuePoints.map((p) => p.count)
+        this.lastWeeklyRevenuePoints = lastWeeklyRevenuePoints.map((p) => p.count) - lastWeeklyRefundedRevenuePoints.map((p) => p.count)
         this.weeklyRefundedAmountPoints = weeklyRefundedAmountPoints.map((p) => p.count)
         this.lastWeeklyRefundedAmountPoints = lastWeeklyRefundedAmountPoints.map((p) => p.count)
         this.isLoading = false
