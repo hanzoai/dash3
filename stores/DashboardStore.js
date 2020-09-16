@@ -253,7 +253,12 @@ export default class DashboardStore {
     const { amount, interval } = this.projectedRevenuePeriod
 
     try {
-      const [projectedRevenue, lastProjectedRevenue] = await Promise.all([
+      const [
+        projectedRevenue,
+        lastProjectedRevenue,
+        projectedRefundedRevenue,
+        lastProjectedRefundedRevenue,
+      ] = await Promise.all([
         this.api.client.counter.search({
           tag: 'order.projected.revenue',
           period: 'hourly',
@@ -268,11 +273,31 @@ export default class DashboardStore {
           before: renderJSONDate(lastWeek),
           after: renderJSONDate(moment(lastWeek).subtract(amount, interval)),
         }),
+        this.api.client.counter.search({
+          tag: 'order.projected.refunded.amount',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(now),
+          after: renderJSONDate(moment(now).subtract(amount, interval)),
+        }),
+        this.api.client.counter.search({
+          tag: 'order.projected.refunded.amount',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(lastWeek),
+          after: renderJSONDate(moment(lastWeek).subtract(amount, interval)),
+        }),
       ])
 
+      console.log('zzz',
+        projectedRevenue,
+        lastProjectedRevenue,
+        projectedRefundedRevenue,
+        lastProjectedRefundedRevenue)
+
       runInAction(() => {
-        this.projectedRevenue = projectedRevenue.count
-        this.lastProjectedRevenue = lastProjectedRevenue.count
+        this.projectedRevenue = projectedRevenue.count - projectedRefundedRevenue.count
+        this.lastProjectedRevenue = lastProjectedRevenue.count - lastProjectedRefundedRevenue.count
         this.isLoading = false
       })
     } catch (e) {
@@ -382,7 +407,6 @@ export default class DashboardStore {
     // chartDates.unshift(moment(now).subtract(1, 'day'))
     // this.chartDates = chartDates
 
-
     const { amount, interval } = this.chartPeriod
 
     try {
@@ -470,15 +494,15 @@ export default class DashboardStore {
     const { amount, interval } = this.revenuePeriod
 
     try {
-      const psWeekly = this.chartDates.map((n) => {
-        return this.api.client.counter.search({
+      const psWeekly = this.chartDates.map((n) => (
+        this.api.client.counter.search({
           tag: 'order.projected.revenue',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(n),
           after: renderJSONDate(moment(n).subtract(1, 'day')),
         })
-      })
+      ))
 
       const psLastWeekly = this.chartDates.map((n) => (
         this.api.client.counter.search({
@@ -490,19 +514,19 @@ export default class DashboardStore {
         })
       ))
 
-      const psProjectedRefundedWeekly = this.chartDates.map((n) => {
-        return this.api.client.counter.search({
-          tag: 'order.projected.revenue',
+      const psProjectedRefundedWeekly = this.chartDates.map((n) => (
+        this.api.client.counter.search({
+          tag: 'order.projected.refunded.amount',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(n),
           after: renderJSONDate(moment(n).subtract(1, 'day')),
         })
-      })
+      ))
 
       const psProjectedRefundedLastWeekly = this.chartDates.map((n) => (
         this.api.client.counter.search({
-          tag: 'order.projected.revenue',
+          tag: 'order.projected.refunded.amount',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(moment(n).subtract(amount, interval)),
@@ -538,8 +562,8 @@ export default class DashboardStore {
       const lastWeeklyRefundedAmountPoints = await Promise.all(psLastWeeklyRefunded)
 
       runInAction(() => {
-        this.weeklyRevenuePoints = weeklyRevenuePoints.map((p) => p.count) - weeklyRefundedRevenuePoints.map((p) => p.count)
-        this.lastWeeklyRevenuePoints = lastWeeklyRevenuePoints.map((p) => p.count) - lastWeeklyRefundedRevenuePoints.map((p) => p.count)
+        this.weeklyRevenuePoints = weeklyRevenuePoints.map((p, i) => p.count - weeklyRefundedRevenuePoints[i].count)
+        this.lastWeeklyRevenuePoints = lastWeeklyRevenuePoints.map((p, i) => p.count - lastWeeklyRefundedRevenuePoints[i].count)
         this.weeklyRefundedAmountPoints = weeklyRefundedAmountPoints.map((p) => p.count)
         this.lastWeeklyRefundedAmountPoints = lastWeeklyRefundedAmountPoints.map((p) => p.count)
         this.isLoading = false
