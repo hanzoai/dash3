@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core'
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@material-ui/core/styles'
 import { observer } from 'mobx-react'
 import moment from 'moment-timezone'
 import numeral from 'numeral'
