@@ -40,9 +40,10 @@ export default class UsersStore {
     this.userId = id || this.userId
 
     try {
-      const [res, ordersRes] = await Promise.all([
+      const [res, ordersRes, referralsRes] = await Promise.all([
         this.api.client.user.get(this.userId),
         this.api.client.user.orders(this.userId),
+        this.api.client.user.referrals(this.userId),
       ])
 
       runInAction(() => {
@@ -52,6 +53,7 @@ export default class UsersStore {
           this.user.kyc.gender = this.user.kyc.gender.toLowerCase()
         }
         this.user.orders = ordersRes
+        this.user.referrals = referralsRes
 
         console.log('user', this.user)
 
