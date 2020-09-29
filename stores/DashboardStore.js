@@ -289,11 +289,11 @@ export default class DashboardStore {
         }),
       ])
 
-      console.log('zzz',
-        projectedRevenue,
-        lastProjectedRevenue,
-        projectedRefundedRevenue,
-        lastProjectedRefundedRevenue)
+      // console.log('zzz',
+      //   projectedRevenue,
+      //   lastProjectedRevenue,
+      //   projectedRefundedRevenue,
+      //   lastProjectedRefundedRevenue)
 
       runInAction(() => {
         this.projectedRevenue = projectedRevenue.count - projectedRefundedRevenue.count
