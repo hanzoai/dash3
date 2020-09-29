@@ -46,6 +46,8 @@ export default class UsersStore {
         this.api.client.user.referrals(this.userId),
       ])
 
+      console.log('refRes', referralsRes)
+
       runInAction(() => {
         this.user = Object.assign(this.user, res)
         // fix gender upper/lower case issues

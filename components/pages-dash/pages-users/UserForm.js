@@ -158,6 +158,12 @@ const UserForm = observer((props) => {
     pageSizeOptions: false,
   }
 
+  const referralsOpts = {
+    search: false,
+    pageSize: user && user.referrals && user.referrals.length,
+    pageSizeOptions: false,
+  }
+
   const {
     hooks,
     errors,
@@ -412,7 +418,7 @@ const UserForm = observer((props) => {
           && <div className={classes.table}>
               <MUITable
                 columns={referralsColumns}
-                options={opts}
+                options={referralsOpts}
                 isLoading={usersStore.isLoading}
                 initialPage={0}
                 data={user.referrals}
