@@ -84,6 +84,7 @@ export default observer(() => {
   const classes = useStyles()
   const { credentialStore } = useStore()
   const [anchorEl, setAnchorEl] = useState(null)
+  const [anchorEl2, setAnchorEl2] = useState(null)
   // const [query, setQuery] = useState(null)
 
   // useEffect(() => {
@@ -99,7 +100,10 @@ export default observer(() => {
         <Link className={classes.columns} href='/'>
           <img src={logoImg} className={classes.logoImg} alt='logo' />
         </Link>
-        <Typography variant='h5'>{org ? org.name : ''}</Typography>
+        <Typography
+          variant='h5'
+          onClick={(event) => { setAnchorEl2(event.currentTarget) }}
+        >{org ? org.name : ''}</Typography>
         <IconButton
           className={classes.flex0}
           aria-owns={open ? 'menu-appbar' : null}
@@ -131,6 +135,30 @@ export default observer(() => {
             Router.push('/')
           }}>
             <Typography variant='body1'>Logout</Typography>
+          </MenuItem>
+        </Menu>
+        <Menu
+          id='menu-appbar'
+          anchorEl={anchorEl2}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          open={open}
+          onClose={() => { setAnchorEl2(null) }}
+        >
+          <MenuItem>
+            <Typography variant='h5'>TitanFX</Typography>
+          </MenuItem>
+          <MenuItem>
+            <Typography variant='h5'>VirtueForex</Typography>
+          </MenuItem>
+          <MenuItem>
+            <Typography variant='h5'>BIGBOSS</Typography>
           </MenuItem>
         </Menu>
       </Toolbar>

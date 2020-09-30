@@ -67,7 +67,7 @@ const Dashboard = observer(() => {
         <SmallDashChart
           cardProps={{}}
           displayValue={projectedRevenue}
-          title='Projected Revenue'
+          title='Revenue'
           queryField='projectedRevenue'
           IconComponent={PaymentOutlined}
           useCurrency
@@ -85,7 +85,7 @@ const Dashboard = observer(() => {
       >
         <SmallDashChart
           displayValue={weeklySales}
-          title='Preorders'
+          title='Number of Payments'
           queryField='sales'
           IconComponent={ShoppingCartOutlined}
           compareValue={weeklySales}
@@ -102,7 +102,7 @@ const Dashboard = observer(() => {
       >
         <SmallDashChart
           displayValue={deposits}
-          title='Deposits'
+          title='Payments Received'
           queryField='deposits'
           useCurrency
           IconComponent={PaymentOutlined}
@@ -120,7 +120,7 @@ const Dashboard = observer(() => {
       >
         <SmallDashChart
           displayValue={refunds}
-          title='Refunds'
+          title='Payments Refunded'
           queryField='refunds'
           IconComponent={PaymentOutlined}
           useCurrency
