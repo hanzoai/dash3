@@ -4,6 +4,7 @@ import {
   FormControlLabel,
   FormGroup,
   TextField,
+  Grid,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { observer } from 'mobx-react'
@@ -49,47 +50,60 @@ export default observer((props) => {
 
   return (
     <FormGroup autoComplete='off'>
-      <TextField
-        id='emai'
-        variant='outlined'
-        label='Email'
-        type='email'
-        value={credentialStore.email}
-        required
-        onChange={(evt) => { credentialStore.setProperty('email', evt.target.value) }}
-        error={credentialStore.errors.email !== ''}
-        className={classes.itemPadding}
-      />
-      <TextField
-        id='password'
-        variant='outlined'
-        label='Password'
-        type='password'
-        required
-        value={credentialStore.password}
-        onChange={(evt) => { credentialStore.setProperty('password', evt.target.value) }}
-        error={credentialStore.errors.password !== ''}
-        className={classes.itemPadding}
-      />
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={credentialStore.remember}
-            onChange={(evt) => { credentialStore.setProperty('remember', evt.target.checked) }}
-            value='remember'
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <TextField
+            id='emai'
+            variant='outlined'
+            label='Email'
+            type='email'
+            value={credentialStore.email}
+            required
+            onChange={(evt) => { credentialStore.setProperty('email', evt.target.value) }}
+            error={credentialStore.errors.email !== ''}
+            className={classes.itemPadding}
+            fullWidth
           />
-        }
-        label='Remember Me'
-        className={classes.centerCheckbox}
-      />
-      <Button
-        size='large'
-        variant='contained'
-        color='primary'
-        type='submit'
-        disabled={disabled}
-        onClick={handleLogin}
-      > LOGIN </Button>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            id='password'
+            variant='outlined'
+            label='Password'
+            type='password'
+            required
+            value={credentialStore.password}
+            onChange={(evt) => { credentialStore.setProperty('password', evt.target.value) }}
+            error={credentialStore.errors.password !== ''}
+            className={classes.itemPadding}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={credentialStore.remember}
+                onChange={(evt) => { credentialStore.setProperty('remember', evt.target.checked) }}
+                value='remember'
+              />
+            }
+            label='Remember Me'
+            className={classes.centerCheckbox}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Button
+            size='large'
+            variant='contained'
+            color='primary'
+            type='submit'
+            disabled={disabled}
+            onClick={handleLogin}
+            fullWidth
+          > LOGIN </Button>
+        </Grid>
+      </Grid>
     </FormGroup>
   )
 })

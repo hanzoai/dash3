@@ -137,30 +137,34 @@ export default observer(() => {
             <Typography variant='body1'>Logout</Typography>
           </MenuItem>
         </Menu>
-        <Menu
-          id='menu-appbar'
-          anchorEl={anchorEl2}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          open={open}
-          onClose={() => { setAnchorEl2(null) }}
-        >
-          <MenuItem>
-            <Typography variant='h5'>TitanFX</Typography>
-          </MenuItem>
-          <MenuItem>
-            <Typography variant='h5'>VirtueForex</Typography>
-          </MenuItem>
-          <MenuItem>
-            <Typography variant='h5'>BIGBOSS</Typography>
-          </MenuItem>
-        </Menu>
+        {
+          // <Menu
+          //   id='menu-appbar2'
+          //   anchorEl={anchorEl2}
+          //   anchorOrigin={{
+          //     vertical: 'bottom',
+          //     horizontal: 'right',
+          //   }}
+          //   transformOrigin={{
+          //     vertical: 'bottom',
+          //     horizontal: 'right',
+          //   }}
+          //   open={open}
+          //   onClose={() => {
+          //     setAnchorEl2(null)
+          //   }}
+          // >
+          //   <MenuItem onClick={() => { setAnchorEl2(null) }}>
+          //     <Typography variant='h5'>TitanFX</Typography>
+          //   </MenuItem>
+          //   <MenuItem onClick={() => { setAnchorEl2(null) }}>
+          //     <Typography variant='h5'>VirtueForex</Typography>
+          //   </MenuItem>
+          //   <MenuItem onClick={() => { setAnchorEl2(null) }}>
+          //     <Typography variant='h5'>BIGBOSS</Typography>
+          //   </MenuItem>
+          // </Menu>
+        }
       </Toolbar>
     </AppBar>
   )

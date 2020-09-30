@@ -19,7 +19,8 @@ const styles = {
     backgroundSize: 'cover',
   },
   logo: {
-    maxHeight: '100px',
+    maxHeight: 100,
+    marginBottom: 20,
   },
   container: {
     minHeight: '100vh',

@@ -88,6 +88,27 @@ const columns = [
   },
 ]
 
+const referralsColumns = [
+  {
+    title: 'Id',
+    field: 'id',
+  },
+  {
+    title: 'OrderId',
+    field: 'orderId',
+  },
+  {
+    title: 'Valid',
+    field: 'createdAt',
+    render: (row) => (row.revoked ? 'False' : 'True'),
+  },
+  {
+    title: 'Created',
+    field: 'createdAt',
+    render: (row) => renderDate(row.createdAt),
+  },
+]
+
 const UserForm = observer((props) => {
   const classes = useStyles()
 
@@ -110,17 +131,17 @@ const UserForm = observer((props) => {
     firstName: [isRequired],
     lastName: [isRequired],
     email: [isRequired, isEmail],
-    'shippingAddress.line1': [isRequired],
+    'shippingAddress.line1': [],
     'shippingAddress.line2': [],
-    'shippingAddress.city': [isRequired],
-    'shippingAddress.postalCode': [isRequired],
+    'shippingAddress.city': [],
+    'shippingAddress.postalCode': [],
     'shippingAddress.state': [
       isStateRequiredForCountry(
         () => settingsStore.stateOptions,
         () => ((usersStore.user && usersStore.user.shippingAddress) ? usersStore.user.shippingAddress.country : undefined),
       ),
     ],
-    'shippingAddress.country': [isRequired],
+    'shippingAddress.country': [],
     'kyc.flagged': [],
     'kyc.frozen': [],
     'kyc.status': [isRequired],
@@ -134,6 +155,12 @@ const UserForm = observer((props) => {
   const opts = {
     search: false,
     pageSize: user && user.orders && user.orders.length,
+    pageSizeOptions: false,
+  }
+
+  const referralsOpts = {
+    search: false,
+    pageSize: user && user.referrals && user.referrals.length,
     pageSizeOptions: false,
   }
 
@@ -152,6 +179,21 @@ const UserForm = observer((props) => {
       ordersStore.order = rowData
 
       Router.push(`/dash/order?id=${rowData.id}`)
+    } catch (e) {
+      setError(e.message || e)
+    }
+
+    setIsLoading(false)
+  }
+
+  const onReferralRowClick = (event, rowData) => {
+    setError(false)
+    setIsLoading(true)
+
+    try {
+      ordersStore.orderId = rowData.orderId
+
+      Router.push(`/dash/order?id=${rowData.orderId}`)
     } catch (e) {
       setError(e.message || e)
     }
@@ -357,7 +399,7 @@ const UserForm = observer((props) => {
       </Grid>
       <Grid item xs={6}/>
       <Grid item xs={12}>
-        { !doCreate && user.orders && user.orders.length
+        { !doCreate && user.orders && !!user.orders.length
           && <div className={classes.table}>
               <MUITable
                 columns={columns}
@@ -367,6 +409,21 @@ const UserForm = observer((props) => {
                 data={user.orders}
                 title='Orders'
                 onRowClick={onRowClick}
+              />
+            </div>
+        }
+      </Grid>
+      <Grid item xs={12}>
+        { !doCreate && user.referrals && !!user.referrals.length
+          && <div className={classes.table}>
+              <MUITable
+                columns={referralsColumns}
+                options={referralsOpts}
+                isLoading={usersStore.isLoading}
+                initialPage={0}
+                data={user.referrals}
+                title='Referrals'
+                onRowClick={onReferralRowClick}
               />
             </div>
         }

@@ -184,8 +184,8 @@ export default class DashboardStore {
       case 'month':
         // This Month
         d = moment().tz('America/Los_Angeles').startOf('month')
-        period.interval = 'day'
-        period.amount = moment().tz('America/Los_Angeles').date()
+        period.interval = 'month'
+        period.amount = 1
         break
       case '30days':
         // Last 30 days
@@ -255,19 +255,12 @@ export default class DashboardStore {
     try {
       const [
         projectedRevenue,
-        projectedRefundedAmount,
         lastProjectedRevenue,
-        lastProjectedRefundedAmount,
+        projectedRefundedRevenue,
+        lastProjectedRefundedRevenue,
       ] = await Promise.all([
         this.api.client.counter.search({
           tag: 'order.projected.revenue',
-          period: 'hourly',
-          geo: '',
-          before: renderJSONDate(now),
-          after: renderJSONDate(moment(now).subtract(amount, interval)),
-        }),
-        this.api.client.counter.search({
-          tag: 'order.projected.refunded.amount',
           period: 'hourly',
           geo: '',
           before: renderJSONDate(now),
@@ -279,6 +272,13 @@ export default class DashboardStore {
           geo: '',
           before: renderJSONDate(lastWeek),
           after: renderJSONDate(moment(lastWeek).subtract(amount, interval)),
+        }),
+        this.api.client.counter.search({
+          tag: 'order.projected.refunded.amount',
+          period: 'hourly',
+          geo: '',
+          before: renderJSONDate(now),
+          after: renderJSONDate(moment(now).subtract(amount, interval)),
         }),
         this.api.client.counter.search({
           tag: 'order.projected.refunded.amount',
@@ -289,9 +289,15 @@ export default class DashboardStore {
         }),
       ])
 
+      // console.log('zzz',
+      //   projectedRevenue,
+      //   lastProjectedRevenue,
+      //   projectedRefundedRevenue,
+      //   lastProjectedRefundedRevenue)
+
       runInAction(() => {
-        this.projectedRevenue = projectedRevenue.count - projectedRefundedAmount.count
-        this.lastProjectedRevenue = lastProjectedRevenue.count - lastProjectedRefundedAmount.count
+        this.projectedRevenue = projectedRevenue.count - projectedRefundedRevenue.count
+        this.lastProjectedRevenue = lastProjectedRevenue.count - lastProjectedRefundedRevenue.count
         this.isLoading = false
       })
     } catch (e) {
@@ -401,7 +407,6 @@ export default class DashboardStore {
     // chartDates.unshift(moment(now).subtract(1, 'day'))
     // this.chartDates = chartDates
 
-
     const { amount, interval } = this.chartPeriod
 
     try {
@@ -509,7 +514,7 @@ export default class DashboardStore {
         })
       ))
 
-      const psWeeklyProjectedRefunded = this.chartDates.map((n) => (
+      const psProjectedRefundedWeekly = this.chartDates.map((n) => (
         this.api.client.counter.search({
           tag: 'order.projected.refunded.amount',
           period: 'hourly',
@@ -519,7 +524,7 @@ export default class DashboardStore {
         })
       ))
 
-      const psLastWeeklyProjectedRefunded = this.chartDates.map((n) => (
+      const psProjectedRefundedLastWeekly = this.chartDates.map((n) => (
         this.api.client.counter.search({
           tag: 'order.projected.refunded.amount',
           period: 'hourly',
@@ -551,14 +556,14 @@ export default class DashboardStore {
 
       const weeklyRevenuePoints = await Promise.all(psWeekly)
       const lastWeeklyRevenuePoints = await Promise.all(psLastWeekly)
-      const weeklyProjectedRefundedAmountPoints = await Promise.all(psWeeklyProjectedRefunded)
-      const lastWeeklyProjectedRefundedAmountPoints = await Promise.all(psLastWeeklyProjectedRefunded)
+      const weeklyRefundedRevenuePoints = await Promise.all(psProjectedRefundedWeekly)
+      const lastWeeklyRefundedRevenuePoints = await Promise.all(psProjectedRefundedLastWeekly)
       const weeklyRefundedAmountPoints = await Promise.all(psWeeklyRefunded)
       const lastWeeklyRefundedAmountPoints = await Promise.all(psLastWeeklyRefunded)
 
       runInAction(() => {
-        this.weeklyRevenuePoints = weeklyRevenuePoints.map((p, i) => p.count - weeklyProjectedRefundedAmountPoints[i].count)
-        this.lastWeeklyRevenuePoints = lastWeeklyRevenuePoints.map((p, i) => p.count - lastWeeklyProjectedRefundedAmountPoints[i].count)
+        this.weeklyRevenuePoints = weeklyRevenuePoints.map((p, i) => p.count - weeklyRefundedRevenuePoints[i].count)
+        this.lastWeeklyRevenuePoints = lastWeeklyRevenuePoints.map((p, i) => p.count - lastWeeklyRefundedRevenuePoints[i].count)
         this.weeklyRefundedAmountPoints = weeklyRefundedAmountPoints.map((p) => p.count)
         this.lastWeeklyRefundedAmountPoints = lastWeeklyRefundedAmountPoints.map((p) => p.count)
         this.isLoading = false
@@ -898,24 +903,6 @@ export default class DashboardStore {
       }))
     }
 
-    // const ps4 = []
-    // for (const product of this.products) {
-    //   ps4.push(this.api.client.counter.search({
-    //     tag: `product.${product.id}.refunded.amount`,
-    //     period: 'total',
-    //     geo: '',
-    //   }))
-    // }
-
-    // const ps5 = []
-    // for (const product of this.products) {
-    //   ps5.push(this.api.client.counter.search({
-    //     tag: `product.${product.id}.projected.refunded.amount`,
-    //     period: 'total',
-    //     geo: '',
-    //   }))
-    // }
-
     try {
       const res = await Promise.all(ps)
       for (const k in this.products) {
@@ -945,26 +932,6 @@ export default class DashboardStore {
       console.log('counter error', e)
       throw e
     }
-
-    // try {
-    //   const res = await Promise.all(ps4)
-    //   for (const k in this.products) {
-    //     this.products[k].refundedAmount = res[k].count
-    //   }
-    // } catch (e) {
-    //   console.log('counter error', e)
-    //   throw e
-    // }
-
-    // try {
-    //   const res = await Promise.all(ps5)
-    //   for (const k in this.products) {
-    //     this.products[k].projectedRefundedAmount = res[k].count
-    //   }
-    // } catch (e) {
-    //   console.log('counter error', e)
-    //   throw e
-    // }
 
     runInAction(() => {
       this.products = this.products.slice().sort((a, b) => b.sold - a.sold)

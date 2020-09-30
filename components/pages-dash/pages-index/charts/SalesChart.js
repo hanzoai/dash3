@@ -15,7 +15,7 @@ import {
   ArrowDropDown as ArrowDropDownIcon,
 } from '@material-ui/icons'
 
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@material-ui/core/styles'
 
 import { observer } from 'mobx-react'
 

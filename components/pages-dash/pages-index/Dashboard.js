@@ -44,8 +44,10 @@ const Dashboard = observer(() => {
     deposits,
     refunds,
     weeklySales,
-    lastDeposits,
+    weeklyRefunded,
     lastWeeklySales,
+    lastWeeklyRefunded,
+    lastDeposits,
     lastRefunds,
     projectedRevenue,
     lastProjectedRevenue,
@@ -84,12 +86,12 @@ const Dashboard = observer(() => {
         xs={12}
       >
         <SmallDashChart
-          displayValue={weeklySales}
+          displayValue={weeklySales - weeklyRefunded}
           title='Number of Payments'
           queryField='sales'
           IconComponent={ShoppingCartOutlined}
-          compareValue={weeklySales}
-          previousValue={lastWeeklySales}
+          compareValue={weeklySales - weeklyRefunded}
+          previousValue={lastWeeklySales - lastWeeklyRefunded}
           timeSelectValue={salesSelect}
         />
       </Grid>
