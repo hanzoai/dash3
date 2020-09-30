@@ -4,6 +4,7 @@ import {
 import {
   PaymentOutlined,
   ShoppingCartOutlined,
+  Receipt,
 } from '@material-ui/icons'
 import { observer } from 'mobx-react'
 import { useEffect } from 'react'
@@ -61,7 +62,7 @@ const Dashboard = observer(() => {
     <Grid container justify='center' alignItems='flex-start' spacing={2}>
       <Grid
         item
-        lg={3}
+        lg={2}
         sm={6}
         xl={3}
         xs={12}
@@ -80,7 +81,7 @@ const Dashboard = observer(() => {
       </Grid>
       <Grid
         item
-        lg={3}
+        lg={2}
         sm={6}
         xl={3}
         xs={12}
@@ -97,7 +98,7 @@ const Dashboard = observer(() => {
       </Grid>
       <Grid
         item
-        lg={3}
+        lg={2}
         sm={6}
         xl={3}
         xs={12}
@@ -115,7 +116,24 @@ const Dashboard = observer(() => {
       </Grid>
       <Grid
         item
-        lg={3}
+        lg={2}
+        sm={6}
+        xl={3}
+        xs={12}
+      >
+        <SmallDashChart
+          displayValue={weeklySales}
+          title='Deposits Processed'
+          queryField='deposits'
+          IconComponent={PaymentOutlined}
+          compareValue={weeklySales}
+          previousValue={lastWeeklySales}
+          timeSelectValue={salesSelect}
+        />
+      </Grid>
+      <Grid
+        item
+        lg={2}
         sm={6}
         xl={3}
         xs={12}
@@ -124,11 +142,28 @@ const Dashboard = observer(() => {
           displayValue={refunds}
           title='Refunds'
           queryField='refunds'
-          IconComponent={PaymentOutlined}
+          IconComponent={Receipt}
           useCurrency
           compareValue={refunds}
           previousValue={lastRefunds}
           timeSelectValue={refundsSelect}
+        />
+      </Grid>
+      <Grid
+        item
+        lg={2}
+        sm={6}
+        xl={3}
+        xs={12}
+      >
+        <SmallDashChart
+          displayValue={weeklyRefunded}
+          title='Refunds Processed'
+          queryField='sales'
+          IconComponent={Receipt}
+          compareValue={weeklyRefunded}
+          previousValue={lastWeeklyRefunded}
+          timeSelectValue={salesSelect}
         />
       </Grid>
       <Grid item xs={12}>
